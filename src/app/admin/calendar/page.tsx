@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import {
   Calendar as CalendarIcon,
@@ -25,6 +25,12 @@ export default function AdminCalendarPage() {
   const [viewMode, setViewMode] = useState<'GRID' | 'LIST'>('GRID');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setViewMode('LIST');
+    }
+  }, []);
 
   const todayStr = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(todayStr);
