@@ -3,8 +3,8 @@ import './globals.css';
 import { AppProvider } from '@/context/AppContext';
 
 export const metadata: Metadata = {
-  title: 'UCE Randevu & Salon Yönetim Sistemi',
-  description: 'Küçük esnaflar için modern randevu, personel takvimi, kasa ve otomasyon platformu.',
+  title: 'UCE Randevu - Randevu ve İşletme Yönetim Platformu',
+  description: 'Modern randevu, personel takvimi, kasa ve otomasyon platformu.',
 };
 
 export default function RootLayout({

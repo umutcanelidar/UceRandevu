@@ -160,7 +160,7 @@ export default function AdminCalendarPage() {
         </div>
       </div>
 
-      {/* Interactive Planla.co Style Schedule Grid */}
+      {/* Interactive Staff Schedule Grid */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-x-auto">
         <div className="min-w-[800px]">
           {/* Staff Columns Header */}

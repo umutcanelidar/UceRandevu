@@ -27,9 +27,6 @@ export default function HomePage() {
             </div>
             <div>
               <span className="font-bold text-base text-slate-900 tracking-tight">UCE Randevu</span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                Salon Yönetim SaaS
-              </span>
             </div>
           </div>
 
@@ -59,7 +56,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            Rakiplerin aylık 1.600 TL istediği sistemi; esnafa uygun fiyatlarla, sıfır SMS maliyetli WhatsApp entegrasyonu ve tam kasa gizliliğiyle sunun.
+            İşletmenizin tüm randevu akışını, personel takvimlerini ve gelir-gider kasasını tek bir ekrandan kolayca yönetin; müşterilerinize modern ve hızlı bir randevu deneyimi yaşatın.
           </p>
 
           <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
@@ -95,7 +92,7 @@ export default function HomePage() {
             <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
               <Calendar className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Planla.co Tarzı Takvim</h3>
+            <h3 className="font-bold text-slate-900 text-base">Akıllı Randevu Takvimi</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
               Tüm çalışanlarınızın saatlik çalışma planını yan yana görün, boş saatlere tek tıkla randevu oluşturun.
             </p>
@@ -132,13 +129,13 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Pricing & Business Model Callout */}
+        {/* Pricing & Value Section */}
         <div className="bg-white rounded-2xl border border-blue-200 p-8 shadow-xs max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2">
-            <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">UCE Bilişim SaaS Avantajı</span>
-            <h2 className="text-2xl font-extrabold text-slate-900">Piyasanın 4 Katı Daha Uygun Fiyat</h2>
+            <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">UCE Bilişim Güvencesiyle</span>
+            <h2 className="text-2xl font-extrabold text-slate-900">İşletmenizi Kolayca Dijitalleştirin</h2>
             <p className="text-xs text-slate-600 leading-relaxed max-w-xl">
-              Piyasadaki firmalar aylık 1.600 TL talep ederken, UCE Bilişim altyapısıyla esnafa 399 TL / ay gibi cazip bir fiyatla randevu + kasa + WhatsApp çözümünü sunabilirsiniz.
+              Yüksek komisyonlar ve karmaşık sözleşmeler olmadan; randevu takvimi, kasa takibi ve WhatsApp otomasyonuyla işletmenizin verimliliğini anında artırın.
             </p>
           </div>
 
@@ -158,8 +155,8 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© 2026 UCE Bilişim • Randevu ve Salon Yönetim Yazılımı</span>
-          <span>Kurumsal Beyaz & Mavi Tasarım Mimarisi</span>
+          <span>© 2026 UCE Bilişim • Randevu ve Yönetim Platformu</span>
+          <span>Tüm Hakları Saklıdır</span>
         </div>
       </footer>
     </div>
