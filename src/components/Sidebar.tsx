@@ -26,7 +26,14 @@ export default function Sidebar() {
   const { currentUser, tenant, staffList, switchUser, isMobileMenuOpen, setIsMobileMenuOpen } = useApp();
   const isAdmin = currentUser.role === 'SPECIAL_ADMIN';
 
-  const adminNav = [
+  interface NavItem {
+    name: string;
+    href: string;
+    icon: any;
+    badge?: string;
+  }
+
+  const adminNav: NavItem[] = [
     { name: 'Randevu Takvimi', href: '/admin/calendar', icon: Calendar },
     { name: 'Genel Bakış', href: '/admin', icon: LayoutDashboard },
     { name: 'Kasa & Gelir-Gider', href: '/admin/finance', icon: Wallet, badge: 'Kasa' },
@@ -35,7 +42,7 @@ export default function Sidebar() {
     { name: 'WhatsApp Otomasyonu', href: '/admin/automations', icon: MessageSquare, badge: 'Aktif' },
   ];
 
-  const staffNav = [
+  const staffNav: NavItem[] = [
     { name: 'Randevularım', href: '/staff', icon: Calendar },
   ];
 
