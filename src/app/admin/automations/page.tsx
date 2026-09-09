@@ -96,23 +96,23 @@ export default function AdminAutomationsPage() {
           {/* Test Box */}
           <form onSubmit={handleSendTest} className="pt-2 space-y-2.5 text-xs border-t border-slate-100">
             <span className="font-semibold text-slate-800 block">Canlı Test Mesajı Gönder:</span>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 placeholder="0532 123 45 67"
                 value={testPhone}
                 onChange={(e) => setTestPhone(e.target.value)}
-                className="w-1/3 px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 font-medium text-xs"
+                className="w-full sm:w-1/3 px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 font-medium text-xs"
               />
               <input
                 type="text"
                 value={testMsg}
                 onChange={(e) => setTestMsg(e.target.value)}
-                className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs"
+                className="w-full sm:flex-1 px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs"
               />
               <button
                 type="submit"
-                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition flex items-center space-x-1 shrink-0 cursor-pointer shadow-xs"
+                className="w-full sm:w-auto px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition flex items-center justify-center space-x-1 shrink-0 cursor-pointer shadow-xs"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Gönder</span>

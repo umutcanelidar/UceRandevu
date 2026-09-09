@@ -13,12 +13,16 @@ import {
   CheckCircle2,
   XCircle,
   Filter,
+  List,
+  LayoutGrid,
+  MessageCircle,
 } from 'lucide-react';
 
 export default function AdminCalendarPage() {
   const { staffList, services, appointments, addAppointment, updateAppointmentStatus, tenant } = useApp();
 
   const [selectedStaffFilter, setSelectedStaffFilter] = useState<string>('ALL');
+  const [viewMode, setViewMode] = useState<'GRID' | 'LIST'>('GRID');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
 
@@ -86,6 +90,15 @@ export default function AdminCalendarPage() {
     setNotes('');
   };
 
+  // Appointments sorted for list view
+  const appointmentsForDay = appointments
+    .filter((apt) => {
+      if (apt.date !== selectedDate) return false;
+      if (selectedStaffFilter !== 'ALL' && apt.staffId !== selectedStaffFilter) return false;
+      return true;
+    })
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
   // Date formatting for header
   const dateObj = new Date(selectedDate);
   const formattedDate = dateObj.toLocaleDateString('tr-TR', {
@@ -96,63 +109,76 @@ export default function AdminCalendarPage() {
   });
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Calendar Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+        {/* Left: Date Navigation */}
+        <div className="flex items-center justify-between sm:justify-start space-x-2 sm:space-x-3">
+          <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50 shrink-0">
             <button
               onClick={() => changeDateByDays(-1)}
-              className="p-2 hover:bg-slate-200 text-slate-600 transition"
+              className="p-1.5 sm:p-2 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
               title="Önceki Gün"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => setSelectedDate(todayStr)}
-              className="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 border-x border-slate-200 transition"
+              className="px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 border-x border-slate-200 transition cursor-pointer"
             >
               Bugün
             </button>
             <button
               onClick={() => changeDateByDays(1)}
-              className="p-2 hover:bg-slate-200 text-slate-600 transition"
+              className="p-1.5 sm:p-2 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
               title="Sonraki Gün"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <CalendarIcon className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-bold text-slate-900 capitalize">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0">
+            <CalendarIcon className="w-4 h-4 text-blue-600 shrink-0" />
+            <span className="text-xs sm:text-sm font-bold text-slate-900 capitalize truncate">
               {formattedDate}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          {/* Staff Filter */}
-          <div className="flex items-center space-x-2">
-            <Filter className="w-3.5 h-3.5 text-slate-400" />
-            <select
-              value={selectedStaffFilter}
-              onChange={(e) => setSelectedStaffFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 focus:outline-hidden focus:border-blue-500"
+        {/* Right: View Toggle (Grid / List) & Actions */}
+        <div className="flex items-center justify-between sm:justify-end space-x-2">
+          {/* View Mode Switcher */}
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+            <button
+              onClick={() => setViewMode('GRID')}
+              className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-md font-semibold transition cursor-pointer ${
+                viewMode === 'GRID'
+                  ? 'bg-white text-blue-700 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="Tablo Görünümü"
             >
-              <option value="ALL">Tüm Personeller</option>
-              {staffList.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.staffCode})
-                </option>
-              ))}
-            </select>
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span className="text-[11px]">Tablo</span>
+            </button>
+            <button
+              onClick={() => setViewMode('LIST')}
+              className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-md font-semibold transition cursor-pointer ${
+                viewMode === 'LIST'
+                  ? 'bg-white text-blue-700 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="Liste / Ajanda Görünümü"
+            >
+              <List className="w-3.5 h-3.5" />
+              <span className="text-[11px]">Liste ({appointmentsForDay.length})</span>
+            </button>
           </div>
 
           {/* New Appointment Button */}
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition flex items-center space-x-1.5 shadow-xs cursor-pointer"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition flex items-center space-x-1.5 shadow-xs cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Yeni Randevu</span>
@@ -160,119 +186,292 @@ export default function AdminCalendarPage() {
         </div>
       </div>
 
-      {/* Interactive Staff Schedule Grid */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-x-auto">
-        <div className="min-w-[800px]">
-          {/* Staff Columns Header */}
-          <div className="grid grid-cols-[80px_repeat(auto-fit,_minmax(220px,_1fr))] border-b border-slate-200 bg-slate-50 sticky top-0 z-10">
-            <div className="p-3 text-center border-r border-slate-200 text-xs font-bold text-slate-400">
-              SAAT
+      {/* Staff Quick Pills Bar (Swipeable on Mobile) */}
+      <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 no-scrollbar">
+        <button
+          onClick={() => setSelectedStaffFilter('ALL')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer shrink-0 ${
+            selectedStaffFilter === 'ALL'
+              ? 'bg-blue-600 text-white shadow-xs'
+              : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+          }`}
+        >
+          Tüm Ekip ({appointments.filter((a) => a.date === selectedDate).length})
+        </button>
+        {staffList.map((s) => {
+          const count = appointments.filter(
+            (a) => a.date === selectedDate && a.staffId === s.id
+          ).length;
+          const isSelected = selectedStaffFilter === s.id;
+          return (
+            <button
+              key={s.id}
+              onClick={() => setSelectedStaffFilter(s.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center space-x-1.5 shrink-0 ${
+                isSelected
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <span>{s.name.split(' ')[0]}</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                  isSelected ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500'
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* VIEW MODE 1: AGENDA LIST VIEW (Ideal for mobile screens & quick checking) */}
+      {viewMode === 'LIST' ? (
+        <div className="space-y-3">
+          {appointmentsForDay.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-3 shadow-xs">
+              <CalendarIcon className="w-10 h-10 text-slate-300 mx-auto" />
+              <h3 className="text-sm font-bold text-slate-800">Bu Tarihte Planlanmış Randevu Yok</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                {formattedDate} tarihi için seçili filtrede kayıtlı bir randevu bulunmuyor.
+              </p>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs cursor-pointer"
+              >
+                + Yeni Randevu Oluştur
+              </button>
             </div>
-            {displayedStaff.map((staff) => (
-              <div key={staff.id} className="p-3 border-r border-slate-200 last:border-r-0">
-                <div className="flex items-center space-x-2.5">
-                  <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center">
-                    {staff.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-slate-900">{staff.name}</h3>
-                    <p className="text-[10px] text-slate-500 font-mono font-semibold">
-                      {staff.staffCode} • {staff.title}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {appointmentsForDay.map((apt) => {
+                const srv = services.find((s) => s.id === apt.serviceId);
+                const staff = staffList.find((s) => s.id === apt.staffId);
+                const isCompleted = apt.status === 'COMPLETED';
+                const isCancelled = apt.status === 'CANCELLED';
 
-          {/* Hour Rows */}
-          <div className="divide-y divide-slate-100">
-            {hours.map((timeStr) => {
-              const [hourNum] = timeStr.split(':').map(Number);
-
-              return (
-                <div key={timeStr} className="grid grid-cols-[80px_repeat(auto-fit,_minmax(220px,_1fr))] min-h-[72px]">
-                  {/* Time label */}
-                  <div className="p-2.5 text-center border-r border-slate-200 text-xs font-semibold text-slate-400 bg-slate-50/50 flex items-start justify-center">
-                    {timeStr}
-                  </div>
-
-                  {/* Staff Slots */}
-                  {displayedStaff.map((staff) => {
-                    // Find appointments matching this staff, date, and hour
-                    const slotAppointments = appointments.filter((apt) => {
-                      if (apt.staffId !== staff.id || apt.date !== selectedDate) return false;
-                      const [aptHour] = apt.startTime.split(':').map(Number);
-                      return aptHour === hourNum;
-                    });
-
-                    return (
-                      <div
-                        key={staff.id}
-                        className="p-1.5 border-r border-slate-100 last:border-r-0 relative group hover:bg-slate-50/70 transition"
-                      >
-                        {slotAppointments.length > 0 ? (
-                          <div className="space-y-1.5">
-                            {slotAppointments.map((apt) => {
-                              const srv = services.find((s) => s.id === apt.serviceId);
-                              const isCompleted = apt.status === 'COMPLETED';
-                              const isCancelled = apt.status === 'CANCELLED';
-
-                              return (
-                                <div
-                                  key={apt.id}
-                                  onClick={() => setSelectedAppointment(apt)}
-                                  className={`p-2.5 rounded-lg border text-left cursor-pointer transition shadow-xs ${
-                                    isCompleted
-                                      ? 'bg-emerald-50 border-emerald-200 text-emerald-950 hover:bg-emerald-100/70'
-                                      : isCancelled
-                                      ? 'bg-rose-50 border-rose-200 text-rose-950 hover:bg-rose-100/70'
-                                      : 'bg-blue-50 border-blue-200 text-blue-950 hover:bg-blue-100/70'
-                                  }`}
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <span className="font-bold text-xs tracking-tight truncate">
-                                      {apt.customerName}
-                                    </span>
-                                    <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-white/80 border border-slate-200/60">
-                                      {apt.startTime}
-                                    </span>
-                                  </div>
-
-                                  <div className="text-[11px] font-medium text-slate-600 truncate mt-0.5">
-                                    {srv?.name}
-                                  </div>
-
-                                  <div className="flex items-center justify-between mt-1 text-[10px] text-slate-500">
-                                    <span>{srv?.durationMinutes} dk</span>
-                                    <span className="font-bold text-slate-900">{apt.price} {tenant.currency}</span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleSlotClick(staff.id, timeStr)}
-                            className="w-full h-full min-h-[48px] rounded-lg border border-transparent hover:border-dashed hover:border-blue-300 hover:bg-blue-50/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[11px] font-semibold text-blue-600 cursor-pointer"
-                          >
-                            + Randevu
-                          </button>
-                        )}
+                return (
+                  <div
+                    key={apt.id}
+                    className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3 hover:border-blue-200 transition"
+                  >
+                    {/* Time & Price Header */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-mono font-bold text-xs px-2 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                          {apt.startTime} - {apt.endTime}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                            isCompleted
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : isCancelled
+                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                              : 'bg-amber-50 text-amber-700 border border-amber-200'
+                          }`}
+                        >
+                          {isCompleted ? 'Tamamlandı' : isCancelled ? 'İptal' : 'Onaylandı'}
+                        </span>
                       </div>
-                    );
-                  })}
+
+                      <div className="text-right">
+                        <span className="font-extrabold text-sm text-slate-900">
+                          {apt.price} {tenant.currency}
+                        </span>
+                        <p className="text-[10px] text-slate-400">{srv?.durationMinutes} dk</p>
+                      </div>
+                    </div>
+
+                    {/* Customer & Service Info */}
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-900">{apt.customerName}</h4>
+                      <p className="text-xs text-slate-600 font-medium mt-0.5">{srv?.name}</p>
+                    </div>
+
+                    {/* Staff & Direct Communication Bar */}
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
+                      <div className="flex items-center space-x-1.5">
+                        <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold text-[10px] flex items-center justify-center">
+                          {staff?.name.charAt(0)}
+                        </div>
+                        <span className="font-medium text-slate-700">{staff?.name}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          ({staff?.staffCode})
+                        </span>
+                      </div>
+
+                      <div className="flex items-center space-x-1.5">
+                        <a
+                          href={`tel:${apt.customerPhone}`}
+                          className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          title="Telefonla Ara"
+                        >
+                          <Phone className="w-3.5 h-3.5" />
+                        </a>
+                        <a
+                          href={`https://wa.me/90${apt.customerPhone.replace(/[^0-9]/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
+                          title="WhatsApp Mesajı Gönder"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Quick Action Buttons */}
+                    <div className="flex items-center space-x-2 pt-1">
+                      {apt.status === 'CONFIRMED' && (
+                        <>
+                          <button
+                            onClick={() => updateAppointmentStatus(apt.id, 'COMPLETED')}
+                            className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition flex items-center justify-center space-x-1 shadow-xs cursor-pointer"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Hizmeti Tamamla</span>
+                          </button>
+                          <button
+                            onClick={() => updateAppointmentStatus(apt.id, 'CANCELLED')}
+                            className="py-1.5 px-3 border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-semibold rounded-lg transition cursor-pointer"
+                          >
+                            İptal
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => setSelectedAppointment(apt)}
+                        className="py-1.5 px-3 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold rounded-lg transition cursor-pointer ml-auto"
+                      >
+                        Detay
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* VIEW MODE 2: INTERACTIVE STAFF SCHEDULE GRID */
+        <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-x-auto">
+          <div className={selectedStaffFilter === 'ALL' ? 'min-w-[800px]' : 'min-w-full'}>
+            {/* Staff Columns Header */}
+            <div className="grid grid-cols-[70px_repeat(auto-fit,_minmax(200px,_1fr))] border-b border-slate-200 bg-slate-50 sticky top-0 z-10">
+              <div className="p-2.5 text-center border-r border-slate-200 text-xs font-bold text-slate-400">
+                SAAT
+              </div>
+              {displayedStaff.map((staff) => (
+                <div key={staff.id} className="p-2.5 border-r border-slate-200 last:border-r-0">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center">
+                      {staff.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-xs font-bold text-slate-900 truncate">{staff.name}</h3>
+                      <p className="text-[10px] text-slate-500 font-mono font-semibold truncate">
+                        {staff.staffCode} • {staff.title}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+
+            {/* Hour Rows */}
+            <div className="divide-y divide-slate-100">
+              {hours.map((timeStr) => {
+                const [hourNum] = timeStr.split(':').map(Number);
+
+                return (
+                  <div
+                    key={timeStr}
+                    className="grid grid-cols-[70px_repeat(auto-fit,_minmax(200px,_1fr))] min-h-[64px]"
+                  >
+                    {/* Time label */}
+                    <div className="p-2 text-center border-r border-slate-200 text-xs font-semibold text-slate-400 bg-slate-50/50 flex items-start justify-center">
+                      {timeStr}
+                    </div>
+
+                    {/* Staff Slots */}
+                    {displayedStaff.map((staff) => {
+                      const slotAppointments = appointments.filter((apt) => {
+                        if (apt.staffId !== staff.id || apt.date !== selectedDate) return false;
+                        const [aptHour] = apt.startTime.split(':').map(Number);
+                        return aptHour === hourNum;
+                      });
+
+                      return (
+                        <div
+                          key={staff.id}
+                          className="p-1.5 border-r border-slate-100 last:border-r-0 relative group hover:bg-slate-50/70 transition"
+                        >
+                          {slotAppointments.length > 0 ? (
+                            <div className="space-y-1.5">
+                              {slotAppointments.map((apt) => {
+                                const srv = services.find((s) => s.id === apt.serviceId);
+                                const isCompleted = apt.status === 'COMPLETED';
+                                const isCancelled = apt.status === 'CANCELLED';
+
+                                return (
+                                  <div
+                                    key={apt.id}
+                                    onClick={() => setSelectedAppointment(apt)}
+                                    className={`p-2 rounded-lg border text-left cursor-pointer transition shadow-xs ${
+                                      isCompleted
+                                        ? 'bg-emerald-50 border-emerald-200 text-emerald-950 hover:bg-emerald-100/70'
+                                        : isCancelled
+                                        ? 'bg-rose-50 border-rose-200 text-rose-950 hover:bg-rose-100/70'
+                                        : 'bg-blue-50 border-blue-200 text-blue-950 hover:bg-blue-100/70'
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-bold text-xs tracking-tight truncate">
+                                        {apt.customerName}
+                                      </span>
+                                      <span className="text-[10px] font-mono font-semibold px-1 rounded bg-white/80 border border-slate-200/60">
+                                        {apt.startTime}
+                                      </span>
+                                    </div>
+
+                                    <div className="text-[11px] font-medium text-slate-600 truncate mt-0.5">
+                                      {srv?.name}
+                                    </div>
+
+                                    <div className="flex items-center justify-between mt-1 text-[10px] text-slate-500">
+                                      <span>{srv?.durationMinutes} dk</span>
+                                      <span className="font-bold text-slate-900">
+                                        {apt.price} {tenant.currency}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleSlotClick(staff.id, timeStr)}
+                              className="w-full h-full min-h-[44px] rounded-lg border border-dashed border-slate-200/60 md:border-transparent hover:border-blue-300 bg-slate-50/30 md:bg-transparent hover:bg-blue-50/50 flex items-center justify-center opacity-70 md:opacity-0 md:group-hover:opacity-100 transition text-[11px] font-semibold text-blue-600 cursor-pointer"
+                            >
+                              + Randevu
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Appointment Details Modal */}
       {selectedAppointment && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-slate-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 space-y-4 shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between pb-3 border-b border-slate-100">
               <div>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
@@ -361,8 +560,8 @@ export default function AdminCalendarPage() {
 
       {/* Modal: Add Appointment */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-slate-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 space-y-4 shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-base font-bold text-slate-900">Yeni Randevu Oluştur</h3>

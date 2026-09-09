@@ -14,7 +14,7 @@ export default function StaffLayout({
       <Header />
       <div className="flex-1 flex">
         <Sidebar />
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-5xl">
+        <main className="flex-1 p-3 sm:p-5 md:p-8 pb-24 md:pb-8 overflow-y-auto max-w-5xl w-full">
           {children}
         </main>
       </div>

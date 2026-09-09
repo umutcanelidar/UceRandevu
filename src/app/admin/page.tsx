@@ -150,7 +150,7 @@ export default function AdminDashboard() {
               const isCompleted = apt.status === 'COMPLETED';
 
               return (
-                <div key={apt.id} className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50 transition">
+                <div key={apt.id} className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 hover:bg-slate-50 transition">
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
                       <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">

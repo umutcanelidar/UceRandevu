@@ -178,7 +178,7 @@ export default function StaffPortalPage() {
                   }`}
                 >
                   <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                       <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
                         {apt.startTime} - {apt.endTime}
                       </span>
@@ -245,8 +245,8 @@ export default function StaffPortalPage() {
 
       {/* Modal: Add Appointment */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-slate-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 space-y-4 shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-base font-bold text-slate-900">Kendi Takvimime Randevu Ekle</h3>

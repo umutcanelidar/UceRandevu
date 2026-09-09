@@ -36,6 +36,8 @@ interface AppContextType {
   addService: (srv: Omit<Service, 'id'>) => void;
   updateService: (id: string, srv: Partial<Service>) => void;
   sendWhatsAppMessage: (phone: string, message: string) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (open: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -47,6 +49,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [automationLogs, setAutomationLogs] = useState<AutomationLog[]>(initialAutomationLogs);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Default active user is SPECIAL_ADMIN (Salon Owner)
   const [currentUser, setCurrentUser] = useState<CurrentUser>({
@@ -200,6 +203,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addService,
         updateService,
         sendWhatsAppMessage,
+        isMobileMenuOpen,
+        setIsMobileMenuOpen,
       }}
     >
       {children}
