@@ -67,6 +67,8 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
       status: 'CONFIRMED',
       price: selectedService.price,
       notes,
+      depositAmount: 0,
+      depositPaid: false,
     });
 
     setStep(5);

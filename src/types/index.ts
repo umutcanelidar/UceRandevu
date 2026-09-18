@@ -14,6 +14,8 @@ export interface Tenant {
   whatsappNumber?: string;
   instagramConnected: boolean;
   instagramHandle?: string;
+  monthlyTarget: number; // Aylık Hedef Ciro (örn: 150.000 ₺)
+  dailyTarget: number;   // Günlük Hedef Ciro (örn: 6.000 ₺)
   createdAt: string;
 }
 
@@ -24,35 +26,135 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
-  staffId?: string; // e.g. "ST-101"
+  staffId?: string;
 }
 
 export interface Staff {
   id: string;
   tenantId: string;
-  staffCode: string; // e.g. "ST-101", "ST-102"
+  staffCode: string; // "ST-01", "ST-02"
   name: string;
-  title: string; // e.g. "Protez Tırnak Uzmanı", "Nail Artist"
+  title: string; // "Kıdemli Protez Tırnak Uzmanı", "Nail Artist", "Medikal Pedikürist"
   phone: string;
   avatarColor: string;
   isActive: boolean;
-  commissionRate: number; // e.g. 20 (%)
+  commissionRate: number; // Prim oranı (%)
   workingHours: {
     start: string; // "09:00"
     end: string;   // "19:00"
-    days: number[]; // 1=Mon, 2=Tue, ..., 7=Sun
+    days: number[]; // [1, 2, 3, 4, 5, 6] (1=Pzt ... 7=Paz)
   };
+  offDays: number[]; // Haftalık izin günleri [7] (Pazar) veya [1] (Pazartesi)
+  leaveDates: string[]; // Özel izin tarihleri: ["2026-09-22", "2026-09-23"]
 }
 
 export interface Service {
   id: string;
   tenantId: string;
   name: string;
-  category: string; // "Tırnak", "Bakım", "Kirpik/Kaş", "Saç"
-  durationMinutes: number; // e.g. 60, 90
+  category: string; // "Protez Tırnak", "Kalıcı Oje", "Manikür/Pedikür", "Kaş/Kirpik", "Cilt Bakımı"
+  durationMinutes: number; // 30, 45, 60, 90 dk
   price: number;
   description?: string;
   isActive: boolean;
+}
+
+export interface Customer {
+  id: string;
+  tenantId: string;
+  name: string;
+  phone: string;
+  birthDate?: string; // "YYYY-MM-DD"
+  notes?: string; // Tırnak alerjisi, hassasiyet, renk tercihleri vb.
+  totalVisits: number;
+  totalSpent: number;
+  lastVisitDate: string; // "YYYY-MM-DD"
+  depositStatus: 'NONE' | 'PAID' | 'WAITING';
+  depositAmount: number;
+  favoriteStaffId?: string;
+  createdAt: string;
+}
+
+export interface PackageDefinition {
+  id: string;
+  tenantId: string;
+  name: string;
+  category: string;
+  totalSessions: number; // örn: 5 seans
+  price: number; // Paket satış fiyatı
+  serviceId: string; // Hangi hizmet için geçerli
+  description: string;
+  isActive: boolean;
+}
+
+export interface CustomerPackage {
+  id: string;
+  customerId: string;
+  customerName: string;
+  packageId: string;
+  packageName: string;
+  serviceId: string;
+  totalSessions: number;
+  remainingSessions: number;
+  purchasePrice: number;
+  purchaseDate: string;
+  expiryDate: string;
+  status: 'ACTIVE' | 'COMPLETED' | 'EXPIRED';
+}
+
+export interface RetailProduct {
+  id: string;
+  tenantId: string;
+  name: string;
+  category: string; // "Tırnak Bakım", "El/Ayak Kremi", "Kütikül Serumu", "Kozmetik"
+  barcode?: string;
+  salePrice: number;
+  costPrice: number;
+  stockQuantity: number;
+  minStockThreshold: number; // kritik stok eşiği (örn: 3)
+  unit: string; // "adet", "şişe", "tüp"
+}
+
+export interface ProductSale {
+  id: string;
+  tenantId: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  staffId: string; // Prim yazılacak personel
+  staffName: string;
+  customerId?: string;
+  customerName?: string;
+  paymentMethod: 'CASH' | 'CREDIT_CARD' | 'HAVALE';
+  date: string;
+  createdAt: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  tenantId: string;
+  name: string;
+  category: string; // "Jel Grubu", "Kalıcı Oje", "Sarf & Hijyen", "Alet & Uç"
+  quantity: number;
+  unit: string; // "kutu", "şişe", "adet", "litre"
+  minThreshold: number; // altına düşünce alarm verecek sayı (örn: 3)
+  lastRestockedAt: string;
+}
+
+export interface WaitlistEntry {
+  id: string;
+  tenantId: string;
+  customerName: string;
+  customerPhone: string;
+  requestedServiceId: string;
+  requestedStaffId?: string;
+  preferredDate: string; // "YYYY-MM-DD"
+  preferredTimeSlot: string; // "Sabah (09:00-12:00)", "Öğle (12:00-16:00)", "Akşam (16:00-19:00)", "Fark Etmez"
+  notes?: string;
+  status: 'WAITING' | 'CONTACTED' | 'BOOKED' | 'CANCELLED';
+  createdAt: string;
 }
 
 export type AppointmentStatus = 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
@@ -60,17 +162,22 @@ export type AppointmentStatus = 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SH
 export interface Appointment {
   id: string;
   tenantId: string;
+  customerId?: string;
   customerName: string;
   customerPhone: string;
   staffId: string; // References Staff.id
   serviceId: string; // References Service.id
   date: string; // "YYYY-MM-DD"
   startTime: string; // "14:00"
-  endTime: string; // "15:30"
+  endTime: string; // "15:30" (işlem süresine göre otomatik hesaplanır)
   status: AppointmentStatus;
   notes?: string;
   price: number;
-  paymentMethod?: 'CASH' | 'CREDIT_CARD' | 'HAVALE' | 'UNPAID';
+  paymentMethod?: 'CASH' | 'CREDIT_CARD' | 'HAVALE' | 'PACKAGE' | 'UNPAID';
+  depositAmount: number;
+  depositPaid: boolean;
+  usedPackageId?: string; // Seans hakkından düşüldüyse paket ID
+  specialistChangedFrom?: string; // Eski personelin adı/kodu
   whatsappReminderSent: boolean;
   createdAt: string;
 }
@@ -79,12 +186,13 @@ export interface Transaction {
   id: string;
   tenantId: string;
   type: 'INCOME' | 'EXPENSE';
-  category: string; // "Randevu Geliri", "Ürün Satışı", "Malzeme Alımı", "Kira", "Mutfak", "Fatura"
+  category: string; // "Randevu Geliri", "Ürün Satışı", "Paket Satışı", "Kira", "Malzeme Alımı", "Mutfak", "Fatura", "Maaş/Prim"
   amount: number;
   paymentMethod: 'CASH' | 'CREDIT_CARD' | 'HAVALE';
   description: string;
-  staffId?: string; // Optional commission attribution
+  staffId?: string; // Personel cirosu için
   appointmentId?: string;
+  productSaleId?: string;
   date: string; // "YYYY-MM-DD"
   createdAt: string;
 }
@@ -92,7 +200,7 @@ export interface Transaction {
 export interface AutomationLog {
   id: string;
   tenantId: string;
-  type: 'WHATSAPP' | 'INSTAGRAM';
+  type: 'WHATSAPP' | 'INSTAGRAM' | 'SYSTEM_ALERT';
   recipient: string;
   message: string;
   status: 'SENT' | 'DELIVERED' | 'FAILED';

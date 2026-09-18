@@ -14,9 +14,21 @@ import {
 } from 'lucide-react';
 
 export default function AdminStaffPage() {
-  const { currentUser, tenant, staffList, addStaff, appointments } = useApp();
+  const {
+    currentUser,
+    tenant,
+    staffList,
+    addStaff,
+    toggleStaffOffDay,
+    addStaffLeaveDate,
+    removeStaffLeaveDate,
+    appointments,
+  } = useApp();
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedStaffForLeave, setSelectedStaffForLeave] = useState<string | null>(null);
+  const [newLeaveDate, setNewLeaveDate] = useState('');
+
   const [staffCode, setStaffCode] = useState('');
   const [name, setName] = useState('');
   const [title, setTitle] = useState('');
@@ -57,6 +69,8 @@ export default function AdminStaffPage() {
         end: endTime,
         days: [1, 2, 3, 4, 5, 6],
       },
+      offDays: [7], // Varsayılan Pazar izinli
+      leaveDates: [],
     });
 
     setShowAddModal(false);
@@ -141,6 +155,55 @@ export default function AdminStaffPage() {
                     <Percent className="w-3.5 h-3.5 text-slate-400" />
                     <span>Hizmet Primi: <strong>%{staff.commissionRate}</strong></span>
                   </div>
+
+                  {/* Haftalık İzin Günleri (Kapatma) */}
+                  <div className="pt-2 border-t border-slate-100 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Haftalık İzin Günleri (Randevuya Kapatılır):
+                    </span>
+                    <div className="flex items-center space-x-1">
+                      {[
+                        { num: 1, label: 'Pzt' },
+                        { num: 2, label: 'Sal' },
+                        { num: 3, label: 'Çar' },
+                        { num: 4, label: 'Per' },
+                        { num: 5, label: 'Cum' },
+                        { num: 6, label: 'Cmt' },
+                        { num: 7, label: 'Paz' },
+                      ].map((day) => {
+                        const isOff = staff.offDays && staff.offDays.includes(day.num);
+                        return (
+                          <button
+                            key={day.num}
+                            type="button"
+                            onClick={() => toggleStaffOffDay(staff.id, day.num)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${
+                              isOff
+                                ? 'bg-rose-500 text-white shadow-xs'
+                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                            }`}
+                            title={isOff ? `${day.label} İzinli (Takvimde Kilitli)` : `${day.label} Çalışıyor`}
+                          >
+                            {day.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Özel İzinli Tarihler */}
+                  {staff.leaveDates && staff.leaveDates.length > 0 && (
+                    <div className="text-[11px] text-amber-700 bg-amber-50 p-1.5 rounded-md border border-amber-200 flex items-center justify-between">
+                      <span>Özel İzinli Tarih: <strong>{staff.leaveDates.join(', ')}</strong></span>
+                      <button
+                        onClick={() => removeStaffLeaveDate(staff.id, staff.leaveDates[0])}
+                        className="text-amber-900 font-bold hover:text-rose-600 text-xs px-1 cursor-pointer"
+                        title="İzni Kaldır"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 

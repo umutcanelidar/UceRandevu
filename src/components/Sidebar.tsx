@@ -19,6 +19,11 @@ import {
   Menu,
   ShieldCheck,
   ChevronRight,
+  Layers,
+  ShoppingBag,
+  Boxes,
+  Clock,
+  UserCheck,
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -36,8 +41,13 @@ export default function Sidebar() {
   const adminNav: NavItem[] = [
     { name: 'Randevu Takvimi', href: '/admin/calendar', icon: Calendar },
     { name: 'Genel Bakış', href: '/admin', icon: LayoutDashboard },
-    { name: 'Kasa & Gelir-Gider', href: '/admin/finance', icon: Wallet, badge: 'Kasa' },
-    { name: 'Personeller', href: '/admin/staff', icon: Users },
+    { name: 'Müşteriler & CRM', href: '/admin/customers', icon: UserCheck, badge: '45 Gün' },
+    { name: 'Paketler & Seanslar', href: '/admin/packages', icon: Layers, badge: 'Seans' },
+    { name: 'Ürün Satışı (POS)', href: '/admin/pos', icon: ShoppingBag, badge: 'Perakende' },
+    { name: 'Malzeme Stokları', href: '/admin/inventory', icon: Boxes, badge: 'Stok' },
+    { name: 'Bekleme Listesi', href: '/admin/waitlist', icon: Clock, badge: 'Waitlist' },
+    { name: 'Kasa & Gelir-Gider', href: '/admin/finance', icon: Wallet, badge: 'Net Kâr' },
+    { name: 'Personeller & İzinler', href: '/admin/staff', icon: Users },
     { name: 'Hizmetler & Fiyatlar', href: '/admin/services', icon: Tag },
     { name: 'WhatsApp Otomasyonu', href: '/admin/automations', icon: MessageSquare, badge: 'Aktif' },
   ];

@@ -21,6 +21,8 @@ export default function StaffPortalPage() {
     appointments,
     addAppointment,
     updateAppointmentStatus,
+    getMaskedName,
+    getMaskedPhone,
     tenant,
   } = useApp();
 
@@ -71,6 +73,8 @@ export default function StaffPortalPage() {
       status: 'CONFIRMED',
       price: srv?.price || 0,
       notes,
+      depositAmount: 0,
+      depositPaid: false,
     });
 
     setShowAddModal(false);
@@ -182,10 +186,10 @@ export default function StaffPortalPage() {
                       <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
                         {apt.startTime} - {apt.endTime}
                       </span>
-                      <strong className="text-sm font-bold text-slate-900">{apt.customerName}</strong>
-                      <span className="text-xs text-slate-500 flex items-center space-x-1">
+                      <strong className="text-sm font-bold text-slate-900">{getMaskedName(apt.customerName)}</strong>
+                      <span className="text-xs text-slate-500 flex items-center space-x-1 font-mono">
                         <Phone className="w-3 h-3 text-slate-400" />
-                        <span>{apt.customerPhone}</span>
+                        <span>{getMaskedPhone(apt.customerPhone)}</span>
                       </span>
                     </div>
 

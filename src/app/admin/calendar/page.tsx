@@ -16,10 +16,30 @@ import {
   List,
   LayoutGrid,
   MessageCircle,
+  Lock,
 } from 'lucide-react';
 
 export default function AdminCalendarPage() {
-  const { staffList, services, appointments, addAppointment, updateAppointmentStatus, tenant } = useApp();
+  const {
+    staffList,
+    services,
+    appointments,
+    addAppointment,
+    updateAppointmentStatus,
+    reassignAppointmentSpecialist,
+    getMaskedName,
+    getMaskedPhone,
+    tenant,
+    currentUser,
+  } = useApp();
+
+  const isStaffOff = (staff: any, dateStr: string) => {
+    const d = new Date(dateStr);
+    const dayOfWeek = d.getDay() === 0 ? 7 : d.getDay();
+    const isWeeklyOff = staff.offDays && staff.offDays.includes(dayOfWeek);
+    const isSpecialLeave = staff.leaveDates && staff.leaveDates.includes(dateStr);
+    return isWeeklyOff || isSpecialLeave;
+  };
 
   const [selectedStaffFilter, setSelectedStaffFilter] = useState<string>('ALL');
   const [viewMode, setViewMode] = useState<'GRID' | 'LIST'>('GRID');
@@ -88,6 +108,8 @@ export default function AdminCalendarPage() {
       status: 'CONFIRMED',
       price: srv?.price || 0,
       notes,
+      depositAmount: 0,
+      depositPaid: false,
     });
 
     setShowAddModal(false);
@@ -291,7 +313,7 @@ export default function AdminCalendarPage() {
 
                     {/* Customer & Service Info */}
                     <div>
-                      <h4 className="font-bold text-sm text-slate-900">{apt.customerName}</h4>
+                      <h4 className="font-bold text-sm text-slate-900">{getMaskedName(apt.customerName)}</h4>
                       <p className="text-xs text-slate-600 font-medium mt-0.5">{srv?.name}</p>
                     </div>
 
@@ -307,24 +329,28 @@ export default function AdminCalendarPage() {
                         </span>
                       </div>
 
-                      <div className="flex items-center space-x-1.5">
-                        <a
-                          href={`tel:${apt.customerPhone}`}
-                          className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="Telefonla Ara"
-                        >
-                          <Phone className="w-3.5 h-3.5" />
-                        </a>
-                        <a
-                          href={`https://wa.me/90${apt.customerPhone.replace(/[^0-9]/g, '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
-                          title="WhatsApp Mesajı Gönder"
-                        >
-                          <MessageCircle className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
+                      {currentUser.role !== 'STAFF' ? (
+                        <div className="flex items-center space-x-1.5">
+                          <a
+                            href={`tel:${apt.customerPhone}`}
+                            className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                            title="Telefonla Ara"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                          </a>
+                          <a
+                            href={`https://wa.me/90${apt.customerPhone.replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
+                            title="WhatsApp Mesajı Gönder"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 font-mono">Gizli No</span>
+                      )}
                     </div>
 
                     {/* Quick Action Buttons */}
@@ -375,7 +401,14 @@ export default function AdminCalendarPage() {
                       {staff.name.charAt(0)}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-xs font-bold text-slate-900 truncate">{staff.name}</h3>
+                      <div className="flex items-center space-x-1">
+                        <h3 className="text-xs font-bold text-slate-900 truncate">{staff.name}</h3>
+                        {isStaffOff(staff, selectedDate) && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 shrink-0">
+                            İzinli
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[10px] text-slate-500 font-mono font-semibold truncate">
                         {staff.staffCode} • {staff.title}
                       </p>
@@ -402,6 +435,20 @@ export default function AdminCalendarPage() {
 
                     {/* Staff Slots */}
                     {displayedStaff.map((staff) => {
+                      if (isStaffOff(staff, selectedDate)) {
+                        return (
+                          <div
+                            key={staff.id}
+                            className="p-1.5 border-r border-slate-100 last:border-r-0 bg-slate-50/80 flex items-center justify-center text-[10px] text-slate-400 font-medium select-none"
+                          >
+                            <span className="flex items-center space-x-1 opacity-70">
+                              <Lock className="w-3 h-3 text-slate-400" />
+                              <span>İzinli Gün</span>
+                            </span>
+                          </div>
+                        );
+                      }
+
                       const slotAppointments = appointments.filter((apt) => {
                         if (apt.staffId !== staff.id || apt.date !== selectedDate) return false;
                         const [aptHour] = apt.startTime.split(':').map(Number);
@@ -434,7 +481,7 @@ export default function AdminCalendarPage() {
                                   >
                                     <div className="flex items-center justify-between">
                                       <span className="font-bold text-xs tracking-tight truncate">
-                                        {apt.customerName}
+                                        {getMaskedName(apt.customerName)}
                                       </span>
                                       <span className="text-[10px] font-mono font-semibold px-1 rounded bg-white/80 border border-slate-200/60">
                                         {apt.startTime}
@@ -489,10 +536,10 @@ export default function AdminCalendarPage() {
                 }`}>
                   {selectedAppointment.status === 'COMPLETED' ? 'Tamamlandı' : selectedAppointment.status === 'CANCELLED' ? 'İptal Edildi' : 'Onaylandı'}
                 </span>
-                <h3 className="text-base font-bold text-slate-900 mt-1">{selectedAppointment.customerName}</h3>
-                <p className="text-xs text-slate-500 flex items-center space-x-1 mt-0.5">
+                <h3 className="text-base font-bold text-slate-900 mt-1">{getMaskedName(selectedAppointment.customerName)}</h3>
+                <p className="text-xs text-slate-500 flex items-center space-x-1 mt-0.5 font-mono">
                   <Phone className="w-3 h-3" />
-                  <span>{selectedAppointment.customerPhone}</span>
+                  <span>{getMaskedPhone(selectedAppointment.customerPhone)}</span>
                 </p>
               </div>
               <button
@@ -520,12 +567,47 @@ export default function AdminCalendarPage() {
                 <span className="text-slate-500">Ücret:</span>
                 <strong className="text-blue-700 font-bold">{selectedAppointment.price} {tenant.currency}</strong>
               </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Kapora:</span>
+                <strong className="text-emerald-700 font-bold">
+                  {selectedAppointment.depositPaid
+                    ? `${selectedAppointment.depositAmount} ₺ Alındı`
+                    : 'Alınmadı'}
+                </strong>
+              </div>
               {selectedAppointment.notes && (
                 <div className="pt-2 border-t border-slate-200">
                   <span className="text-slate-500 block mb-0.5">Not:</span>
                   <p className="text-slate-800 italic">{selectedAppointment.notes}</p>
                 </div>
               )}
+            </div>
+
+            {/* Uzman Değişikliği (Personel Devri) */}
+            <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100 space-y-1.5 text-xs">
+              <label className="font-bold text-slate-800 flex items-center justify-between">
+                <span>Uzman Değişikliği:</span>
+                {selectedAppointment.specialistChangedFrom && (
+                  <span className="text-[10px] text-amber-700 font-semibold bg-amber-100 px-1.5 py-0.5 rounded">
+                    Önceki: {selectedAppointment.specialistChangedFrom}
+                  </span>
+                )}
+              </label>
+              <select
+                value={selectedAppointment.staffId}
+                onChange={(e) => {
+                  const targetStaffId = e.target.value;
+                  reassignAppointmentSpecialist(selectedAppointment.id, targetStaffId);
+                  setSelectedAppointment({ ...selectedAppointment, staffId: targetStaffId });
+                }}
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-medium text-slate-800 text-xs"
+              >
+                {staffList.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.title})
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Quick Actions */}
