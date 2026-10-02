@@ -25,13 +25,7 @@ import {
 
 export default function UceBilisimManagementGateway() {
   const router = useRouter();
-  const { switchUser } = useApp();
-
   const [storeSlug, setStoreSlug] = useState('bagenailstudio');
-  const [emailOrPhone, setEmailOrPhone] = useState('yonetici@bagenailstudio.com');
-  const [password, setPassword] = useState('123456');
-  const [rememberMe, setRememberMe] = useState(true);
-
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -84,18 +78,16 @@ export default function UceBilisimManagementGateway() {
     const matched = registeredTenants.find((t) => t.slug === cleanSlug || cleanSlug.includes('bage'));
 
     if (matched || cleanSlug === 'bagenailstudio') {
-      setSuccessMessage(`${matched?.name || 'BAGE Nail Studio'} yönetim paneline bağlanılıyor...`);
-      switchUser('SPECIAL_ADMIN');
+      setSuccessMessage(`${matched?.name || 'BAGE Nail Studio'} giriş sayfasına yönlendiriliyorsunuz...`);
 
       setTimeout(() => {
         router.push('/login');
-      }, 700);
+      }, 500);
     } else {
-      setSuccessMessage(`${cleanSlug}.ucebilisim.com adresi doğrulanıyor...`);
-      switchUser('SPECIAL_ADMIN');
+      setSuccessMessage(`${cleanSlug}.ucebilisim.com giriş sayfasına yönlendiriliyorsunuz...`);
       setTimeout(() => {
         router.push('/login');
-      }, 800);
+      }, 600);
     }
   };
 
@@ -204,73 +196,15 @@ export default function UceBilisimManagementGateway() {
                       placeholder="bagenailstudio"
                       value={storeSlug}
                       onChange={(e) => setStoreSlug(e.target.value)}
-                      className="w-full py-2.5 px-2 text-xs font-semibold text-[#1a1a1a] focus:outline-hidden bg-transparent"
+                      className="w-full py-3 px-2 text-xs sm:text-sm font-semibold text-[#1a1a1a] focus:outline-hidden bg-transparent"
                     />
-                    <span className="pr-3.5 pl-2.5 py-2.5 text-xs font-bold text-[#8c6d3f] bg-[#fcfbf9] border-l border-[#e5d5b5] select-none">
+                    <span className="pr-3.5 pl-2.5 py-3 text-xs sm:text-sm font-bold text-[#8c6d3f] bg-[#fcfbf9] border-l border-[#e5d5b5] select-none">
                       .ucebilisim.com
                     </span>
                   </div>
-                  <p className="text-[11px] text-[#666666] mt-1">
-                    Örnek: <strong>bagenailstudio</strong> yazarak doğrudan işletmenizin paneline bağlanabilirsiniz.
+                  <p className="text-[11px] text-[#666666] mt-1.5">
+                    Örnek: <strong>bagenailstudio</strong> yazarak doğrudan işletmenizin giriş sayfasına bağlanabilirsiniz.
                   </p>
-                </div>
-
-                {/* 2. E-Posta / Telefon */}
-                <div>
-                  <label className="block font-bold text-[#1a1a1a] mb-1.5">
-                    Yönetici E-Posta veya Telefon
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="yonetici@bagenailstudio.com"
-                    value={emailOrPhone}
-                    onChange={(e) => setEmailOrPhone(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5d5b5] focus:outline-hidden focus:border-[#c5a059] focus:ring-2 focus:ring-[#c5a059]/20 font-medium text-[#1a1a1a] shadow-2xs transition bg-white"
-                  />
-                </div>
-
-                {/* 3. Şifre */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="font-bold text-[#1a1a1a]">
-                      Yönetici Şifreniz
-                    </label>
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        alert('Şifre sıfırlama bağlantısı kayıtlı yönetici telefonunuza WhatsApp üzerinden iletildi.');
-                      }}
-                      className="text-[11px] text-[#b8860b] hover:text-[#8c6d3f] font-semibold transition"
-                    >
-                      Şifremi Unuttum
-                    </a>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      required
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5d5b5] focus:outline-hidden focus:border-[#c5a059] focus:ring-2 focus:ring-[#c5a059]/20 font-mono text-[#1a1a1a] shadow-2xs transition bg-white"
-                    />
-                    <Lock className="w-4 h-4 text-slate-400 absolute right-3.5 top-3" />
-                  </div>
-                </div>
-
-                {/* Beni Hatırla */}
-                <div className="flex items-center justify-between pt-1">
-                  <label className="flex items-center space-x-2 text-[#555555] cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="rounded border-[#e5d5b5] text-[#b8860b] focus:ring-[#c5a059]"
-                    />
-                    <span>Beni bu tarayıcıda hatırla</span>
-                  </label>
                 </div>
 
                 {/* Yönlendir & Giriş Yap Butonu (Orijinal UceBilişim Altın Gradyanı) */}
@@ -280,9 +214,9 @@ export default function UceBilisimManagementGateway() {
                   style={{
                     background: 'linear-gradient(135deg, #DFBA73 0%, #C5A059 50%, #9E7B34 100%)',
                   }}
-                  className="w-full py-3.5 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg shadow-[#c5a059]/30 hover:brightness-110 flex items-center justify-center space-x-2 cursor-pointer mt-2 border border-[#b8860b]"
+                  className="w-full py-3.5 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-lg shadow-[#c5a059]/30 hover:brightness-110 flex items-center justify-center space-x-2 cursor-pointer mt-3 border border-[#b8860b]"
                 >
-                  <span>{isLoading ? 'Yönetim Paneline Bağlanılıyor...' : 'Yönlendir & Giriş Yap'}</span>
+                  <span>{isLoading ? 'Giriş Sayfasına Yönlendiriliyor...' : 'Giriş Yap'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
@@ -299,7 +233,6 @@ export default function UceBilisimManagementGateway() {
                       type="button"
                       onClick={() => {
                         setStoreSlug(t.slug);
-                        setEmailOrPhone(`yonetici@${t.slug}.com`);
                       }}
                       className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition border cursor-pointer ${
                         storeSlug === t.slug

@@ -43,6 +43,7 @@ export interface Staff {
   name: string;
   title: string; // "Kıdemli Protez Tırnak Uzmanı", "Nail Artist", "Medikal Pedikürist"
   phone: string;
+  pinCode?: string; // Personel Giriş PIN Kodu (örn: "1234")
   avatarColor: string;
   isActive: boolean;
   canPerformServices?: boolean; // Personel işlem yapma yetkisi (aç/kapa)

@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   Calendar,
   KeyRound,
-  Building2,
+  AlertCircle,
   Layers,
 } from 'lucide-react';
 
@@ -20,7 +20,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { tenant, staffList, switchUser } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'ADMIN' | 'STAFF' | 'SUPER_ADMIN'>('ADMIN');
+  const [activeTab, setActiveTab] = useState<'ADMIN' | 'STAFF'>('ADMIN');
 
   // Admin form
   const [adminEmail, setAdminEmail] = useState('yonetici@bagenailstudio.com');
@@ -29,10 +29,6 @@ export default function LoginPage() {
   // Staff form
   const [selectedStaffCode, setSelectedStaffCode] = useState(staffList[0]?.staffCode || 'ST-01');
   const [staffPin, setStaffPin] = useState('1234');
-
-  // Super Admin form
-  const [superAdminEmail, setSuperAdminEmail] = useState('admin@ucebilisim.com');
-  const [superAdminPassword, setSuperAdminPassword] = useState('uce2026!');
 
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -50,23 +46,21 @@ export default function LoginPage() {
 
   const handleStaffLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setErrorMsg('');
+
+    const staff = staffList.find((s) => s.staffCode === selectedStaffCode);
+    const expectedPin = staff?.pinCode || '1234';
+
+    if (staffPin.trim() !== expectedPin) {
+      setErrorMsg(`Hatalı PIN kodu! Lütfen ${staff?.name || 'personel'} için belirlenen geçerli PIN kodunu giriniz.`);
+      return;
+    }
+
+    setIsLoading(true);
 
     setTimeout(() => {
       switchUser('STAFF', selectedStaffCode);
       router.push('/staff');
-    }, 400);
-  };
-
-  const handleSuperAdminLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrorMsg('');
-
-    setTimeout(() => {
-      switchUser('SUPER_ADMIN');
-      router.push('/admin');
     }, 400);
   };
 
@@ -105,11 +99,22 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Error Notice */}
+          {errorMsg && (
+            <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center space-x-2 animate-in fade-in duration-150">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span className="font-medium">{errorMsg}</span>
+            </div>
+          )}
+
           {/* Role Tabs */}
-          <div className="grid grid-cols-3 gap-1.5 p-1 bg-brand-50 rounded-2xl border border-brand-100 text-xs font-semibold">
+          <div className="grid grid-cols-2 gap-1.5 p-1 bg-brand-50 rounded-2xl border border-brand-100 text-xs font-semibold">
             <button
               type="button"
-              onClick={() => setActiveTab('ADMIN')}
+              onClick={() => {
+                setActiveTab('ADMIN');
+                setErrorMsg('');
+              }}
               className={`py-2 px-1 rounded-xl transition flex flex-col items-center justify-center space-y-0.5 cursor-pointer ${
                 activeTab === 'ADMIN'
                   ? 'bg-white text-brand-900 shadow-xs border border-brand-200 font-bold'
@@ -122,7 +127,10 @@ export default function LoginPage() {
 
             <button
               type="button"
-              onClick={() => setActiveTab('STAFF')}
+              onClick={() => {
+                setActiveTab('STAFF');
+                setErrorMsg('');
+              }}
               className={`py-2 px-1 rounded-xl transition flex flex-col items-center justify-center space-y-0.5 cursor-pointer ${
                 activeTab === 'STAFF'
                   ? 'bg-white text-brand-900 shadow-xs border border-brand-200 font-bold'
@@ -131,19 +139,6 @@ export default function LoginPage() {
             >
               <User className="w-4 h-4 text-brand-700" />
               <span className="text-[11px]">Personel</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('SUPER_ADMIN')}
-              className={`py-2 px-1 rounded-xl transition flex flex-col items-center justify-center space-y-0.5 cursor-pointer ${
-                activeTab === 'SUPER_ADMIN'
-                  ? 'bg-white text-brand-900 shadow-xs border border-brand-200 font-bold'
-                  : 'text-brand-700/70 hover:text-brand-900'
-              }`}
-            >
-              <Building2 className="w-4 h-4 text-brand-700" />
-              <span className="text-[11px]">UCE Bilişim</span>
             </button>
           </div>
 
@@ -266,59 +261,6 @@ export default function LoginPage() {
                   🔒 Güvenlik: Personel ekranında salonun kasa ve mali verileri tamamen gizlidir.
                 </span>
               </div>
-            </form>
-          )}
-
-          {/* 3. UCE BİLİŞİM (PLATFORM SAHİBİ) GİRİŞİ */}
-          {activeTab === 'SUPER_ADMIN' && (
-            <form onSubmit={handleSuperAdminLogin} className="space-y-4 text-xs">
-              <div className="p-3 bg-purple-50/70 rounded-2xl border border-purple-200 text-purple-950 space-y-1">
-                <span className="font-bold flex items-center space-x-1.5 text-purple-900">
-                  <Building2 className="w-4 h-4 text-purple-700" />
-                  <span>UCE Bilişim Süper Yönetici</span>
-                </span>
-                <p className="text-[11px] text-purple-800/80 leading-relaxed">
-                  Platform sahibi (Umut Can Elidar). Tüm salonları, kiracıları, subdomainleri ve lisans yenilemelerini yönetir.
-                </p>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-brand-950 mb-1">
-                  UCE Bilişim Yönetici E-Posta
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={superAdminEmail}
-                  onChange={(e) => setSuperAdminEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 font-medium text-brand-950 shadow-2xs bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-brand-950 mb-1">
-                  Süper Yönetici Parolası
-                </label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    required
-                    value={superAdminPassword}
-                    onChange={(e) => setSuperAdminPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 font-mono text-brand-950 shadow-2xs bg-white"
-                  />
-                  <Lock className="w-4 h-4 text-brand-400 absolute right-3 top-3" />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3 bg-gradient-to-r from-purple-700 to-purple-800 hover:from-purple-800 hover:to-purple-900 text-white font-bold text-xs sm:text-sm rounded-2xl transition shadow-md shadow-purple-900/15 flex items-center justify-center space-x-2 cursor-pointer"
-              >
-                <span>{isLoading ? 'Giriş Yapılıyor...' : 'Süper Yönetici Paneline Gir'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
             </form>
           )}
 

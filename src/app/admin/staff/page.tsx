@@ -19,6 +19,7 @@ import {
   BadgeAlert,
   Sparkles,
   Calculator,
+  KeyRound,
 } from 'lucide-react';
 import { StaffLeaveRecord } from '@/types';
 
@@ -44,11 +45,11 @@ export default function AdminStaffPage() {
   const [leaveType, setLeaveType] = useState<'PAID' | 'UNPAID' | 'SICK'>('UNPAID');
   const [leaveNotes, setLeaveNotes] = useState<string>('');
 
-  // Form State for new staff
   const [staffCode, setStaffCode] = useState('');
   const [name, setName] = useState('');
   const [title, setTitle] = useState('');
   const [phone, setPhone] = useState('');
+  const [pinCode, setPinCode] = useState('1234');
   const [baseSalary, setBaseSalary] = useState('32000');
   const [commissionRate, setCommissionRate] = useState('35');
   const [startTime, setStartTime] = useState('10:00');
@@ -78,6 +79,7 @@ export default function AdminStaffPage() {
       name,
       title: title || 'Protez Tırnak & Nail Art Uzmanı',
       phone: phone || '+90 530 000 00 00',
+      pinCode: pinCode.trim() || '1234',
       avatarColor: 'bg-brand-700',
       isActive: true,
       canPerformServices: true,
@@ -98,6 +100,7 @@ export default function AdminStaffPage() {
     setName('');
     setTitle('');
     setPhone('');
+    setPinCode('1234');
   };
 
   const autoGenerateCode = () => {
@@ -251,6 +254,36 @@ export default function AdminStaffPage() {
                   <div className="flex items-center space-x-1.5 text-brand-900">
                     <Clock className="w-3.5 h-3.5 text-brand-600" />
                     <span>{staff.workingHours.start} - {staff.workingHours.end}</span>
+                  </div>
+                </div>
+
+                {/* Personel Giriş PIN Kodu */}
+                <div className="p-2.5 rounded-xl bg-brand-50/70 border border-brand-200/70 flex items-center justify-between text-xs">
+                  <div className="flex items-center space-x-2">
+                    <KeyRound className="w-4 h-4 text-brand-700" />
+                    <div>
+                      <span className="font-bold text-brand-950 block">Giriş PIN Kodu:</span>
+                      <span className="text-[11px] text-brand-700">
+                        Personel sisteme giriş yaparken bu PIN'i kullanır.
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="px-2.5 py-1 bg-white font-mono font-bold text-xs text-brand-950 rounded-lg border border-brand-200 shadow-2xs tracking-widest">
+                      {staff.pinCode || '1234'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newPin = prompt(`${staff.name} için yeni 4-6 haneli PIN kodu belirleyiniz:`, staff.pinCode || '1234');
+                        if (newPin && newPin.trim()) {
+                          updateStaff(staff.id, { pinCode: newPin.trim() });
+                        }
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-brand-700 hover:bg-brand-800 text-white text-[11px] font-semibold transition cursor-pointer"
+                    >
+                      PIN Değiştir
+                    </button>
                   </div>
                 </div>
 
@@ -542,7 +575,7 @@ export default function AdminStaffPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block font-semibold text-brand-950 mb-1">Telefon</label>
                   <input
@@ -555,7 +588,22 @@ export default function AdminStaffPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-brand-950 mb-1">Sabit Aylık Maaş (TL)</label>
+                  <label className="block font-semibold text-brand-950 mb-1">
+                    Giriş PIN Kodu *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="1234"
+                    maxLength={6}
+                    value={pinCode}
+                    onChange={(e) => setPinCode(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-brand-200 font-mono font-bold text-xs text-brand-950 shadow-2xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-brand-950 mb-1">Sabit Maaş (TL)</label>
                   <input
                     type="number"
                     value={baseSalary}
