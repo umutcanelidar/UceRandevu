@@ -86,21 +86,21 @@ export default function StaffPortalPage() {
   return (
     <div className="space-y-6">
       {/* Staff Profile Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-white rounded-2xl border border-brand-100 p-5 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center space-x-3.5">
-          <div className="w-12 h-12 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-base shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-700 to-brand-900 text-white font-bold flex items-center justify-center text-base shadow-sm border border-brand-600/30 font-serif">
             {currentStaff.name.charAt(0)}
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-lg font-bold text-slate-900">{currentStaff.name}</h1>
-              <span className="text-xs font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md">
+              <h1 className="text-lg font-bold text-brand-950 font-serif">{currentStaff.name}</h1>
+              <span className="text-xs font-mono font-bold bg-brand-50 text-brand-800 border border-brand-200 px-2 py-0.5 rounded-md">
                 {currentStaff.staffCode}
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">{currentStaff.title}</p>
-            <p className="text-[11px] text-slate-500 flex items-center space-x-1.5 mt-1 font-medium">
-              <Clock className="w-3.5 h-3.5 text-slate-400" />
+            <p className="text-xs text-brand-700 mt-0.5">{currentStaff.title}</p>
+            <p className="text-[11px] text-brand-800/80 flex items-center space-x-1.5 mt-1 font-medium">
+              <Clock className="w-3.5 h-3.5 text-brand-600" />
               <span>Çalışma Saatlerim: <strong>{currentStaff.workingHours.start} - {currentStaff.workingHours.end}</strong></span>
             </p>
           </div>
@@ -108,59 +108,59 @@ export default function StaffPortalPage() {
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition flex items-center justify-center space-x-1.5 shadow-xs cursor-pointer"
+          className="px-4 py-2.5 bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center space-x-1.5 shadow-sm shadow-brand-900/10 cursor-pointer"
         >
-          <PlusCircle className="w-4 h-4" />
+          <PlusCircle className="w-4 h-4 text-amber-200" />
           <span>Kendi Takvimime Randevu Ekle</span>
         </button>
       </div>
 
       {/* Date & Stats Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="p-4 bg-white rounded-2xl border border-brand-100 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[10px] font-bold text-slate-400 uppercase">SEÇİLİ GÜN</span>
+            <span className="text-[10px] font-bold text-brand-400 uppercase">SEÇİLİ GÜN</span>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="text-xs font-bold text-slate-900 bg-transparent focus:outline-hidden block cursor-pointer"
+              className="text-xs font-bold text-brand-950 bg-transparent focus:outline-hidden block cursor-pointer"
             />
           </div>
-          <CalendarIcon className="w-5 h-5 text-blue-600" />
+          <CalendarIcon className="w-5 h-5 text-brand-700" />
         </div>
 
-        <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="p-4 bg-white rounded-2xl border border-brand-100 shadow-xs flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase">GÜNLÜK RANDEVULARIM</span>
-            <p className="text-xl font-bold text-slate-900">{myAppointments.length} Müşteri</p>
+            <span className="text-[10px] font-bold text-brand-400 uppercase">GÜNLÜK RANDEVULARIM</span>
+            <p className="text-xl font-bold font-serif text-brand-950">{myAppointments.length} Müşteri</p>
           </div>
-          <div className="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-md text-xs font-semibold">
+          <div className="px-2 py-1 bg-brand-50 text-brand-800 border border-brand-200 rounded-lg text-xs font-semibold">
             {pendingCount} Bekleyen
           </div>
         </div>
 
-        <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="p-4 bg-white rounded-2xl border border-brand-100 shadow-xs flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase">TAMAMLANAN</span>
-            <p className="text-xl font-bold text-emerald-600">{completedCount} Seans</p>
+            <span className="text-[10px] font-bold text-brand-400 uppercase">TAMAMLANAN</span>
+            <p className="text-xl font-bold font-serif text-emerald-700">{completedCount} Seans</p>
           </div>
           <CheckCircle2 className="w-5 h-5 text-emerald-600" />
         </div>
       </div>
 
       {/* Appointment Schedule List */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden space-y-4 p-5">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div className="bg-white rounded-2xl border border-brand-100 shadow-xs overflow-hidden space-y-4 p-5">
+        <div className="flex items-center justify-between pb-3 border-b border-brand-100">
           <div>
-            <h2 className="text-sm font-bold text-slate-900">Randevu Listem ({currentStaff.name})</h2>
-            <p className="text-xs text-slate-500">Yalnızca sizin adınıza kayıtlı olan randevular listelenir (Kasa gizliliği aktiftir)</p>
+            <h2 className="text-sm font-bold text-brand-950 font-serif">Randevu Listem ({currentStaff.name})</h2>
+            <p className="text-xs text-brand-700">Yalnızca sizin adınıza kayıtlı olan randevular listelenir (Kasa gizliliği aktiftir)</p>
           </div>
         </div>
 
         {myAppointments.length === 0 ? (
-          <div className="py-12 text-center text-slate-400 space-y-2">
-            <Clock className="w-8 h-8 mx-auto text-slate-300" />
+          <div className="py-12 text-center text-brand-400 space-y-2">
+            <Clock className="w-8 h-8 mx-auto text-brand-300" />
             <p className="text-xs font-medium">Bu tarihe ait kayıtlı randevunuz bulunmamaktadır.</p>
           </div>
         ) : (
@@ -178,29 +178,29 @@ export default function StaffPortalPage() {
                       ? 'bg-emerald-50/60 border-emerald-200'
                       : isCancelled
                       ? 'bg-rose-50/60 border-rose-200'
-                      : 'bg-slate-50 hover:bg-slate-100/70 border-slate-200'
+                      : 'bg-brand-50/40 hover:bg-brand-50/80 border-brand-100'
                   }`}
                 >
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                      <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
+                      <span className="font-mono text-xs font-bold text-brand-800 bg-brand-100/70 border border-brand-200 px-2 py-0.5 rounded-md">
                         {apt.startTime} - {apt.endTime}
                       </span>
-                      <strong className="text-sm font-bold text-slate-900">{getMaskedName(apt.customerName)}</strong>
-                      <span className="text-xs text-slate-500 flex items-center space-x-1 font-mono">
-                        <Phone className="w-3 h-3 text-slate-400" />
+                      <strong className="text-sm font-bold text-brand-950">{getMaskedName(apt.customerName)}</strong>
+                      <span className="text-xs text-brand-700 flex items-center space-x-1 font-mono">
+                        <Phone className="w-3 h-3 text-brand-400" />
                         <span>{getMaskedPhone(apt.customerPhone)}</span>
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-2 text-xs text-slate-600">
-                      <span className="font-medium text-slate-800">{srv?.name}</span>
-                      <span className="text-slate-300">•</span>
+                    <div className="flex items-center space-x-2 text-xs text-brand-800">
+                      <span className="font-semibold text-brand-950">{srv?.name}</span>
+                      <span className="text-brand-300">•</span>
                       <span>{srv?.durationMinutes} dk</span>
                     </div>
 
                     {apt.notes && (
-                      <p className="text-[11px] text-slate-500 italic">
+                      <p className="text-[11px] text-brand-700 italic">
                         Not: {apt.notes}
                       </p>
                     )}
@@ -212,14 +212,14 @@ export default function StaffPortalPage() {
                       <>
                         <button
                           onClick={() => updateAppointmentStatus(apt.id, 'COMPLETED')}
-                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition cursor-pointer shadow-xs"
+                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition cursor-pointer shadow-xs"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>Hizmeti Tamamla</span>
                         </button>
                         <button
                           onClick={() => updateAppointmentStatus(apt.id, 'CANCELLED')}
-                          className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition cursor-pointer"
+                          className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-semibold transition cursor-pointer"
                         >
                           <span>Gelmedi</span>
                         </button>
@@ -227,14 +227,14 @@ export default function StaffPortalPage() {
                     )}
 
                     {isCompleted && (
-                      <span className="text-xs text-emerald-700 font-semibold flex items-center space-x-1 bg-emerald-100 px-3 py-1 rounded-lg">
+                      <span className="text-xs text-emerald-800 font-semibold flex items-center space-x-1 bg-emerald-100/80 px-3 py-1 rounded-xl border border-emerald-200">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Tamamlandı</span>
                       </span>
                     )}
 
                     {isCancelled && (
-                      <span className="text-xs text-rose-700 font-semibold flex items-center space-x-1 bg-rose-100 px-3 py-1 rounded-lg">
+                      <span className="text-xs text-rose-800 font-semibold flex items-center space-x-1 bg-rose-100/80 px-3 py-1 rounded-xl border border-rose-200">
                         <XCircle className="w-3.5 h-3.5" />
                         <span>İptal Edildi</span>
                       </span>
@@ -249,16 +249,16 @@ export default function StaffPortalPage() {
 
       {/* Modal: Add Appointment */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 space-y-4 shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-brand-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-brand-100 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-brand-100">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Kendi Takvimime Randevu Ekle</h3>
-                <p className="text-xs text-blue-600 font-medium">Personel: {currentStaff.name} ({currentStaff.staffCode})</p>
+                <h3 className="text-base font-bold text-brand-950 font-serif">Kendi Takvimime Randevu Ekle</h3>
+                <p className="text-xs text-brand-700 font-medium">Personel: {currentStaff.name} ({currentStaff.staffCode})</p>
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-semibold cursor-pointer"
+                className="text-brand-400 hover:text-brand-800 text-sm font-semibold cursor-pointer"
               >
                 ✕
               </button>
@@ -266,35 +266,35 @@ export default function StaffPortalPage() {
 
             <form onSubmit={handleCreateAppointment} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Müşteri Ad Soyad *</label>
+                <label className="block font-semibold text-brand-950 mb-1">Müşteri Ad Soyad *</label>
                 <input
                   type="text"
                   required
                   placeholder="Örn: Cansu Parlak"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs font-medium"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 text-xs font-medium shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Müşteri Telefonu *</label>
+                <label className="block font-semibold text-brand-950 mb-1">Müşteri Telefonu *</label>
                 <input
                   type="tel"
                   required
                   placeholder="0532 000 00 00"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs font-medium"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 text-xs font-medium shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Hizmet</label>
+                <label className="block font-semibold text-brand-950 mb-1">Hizmet</label>
                 <select
                   value={serviceId}
                   onChange={(e) => setServiceId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs font-medium"
+                  className="w-full px-3 py-2 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 text-xs font-medium shadow-2xs bg-white"
                 >
                   {services.map((srv) => (
                     <option key={srv.id} value={srv.id}>
@@ -306,40 +306,49 @@ export default function StaffPortalPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Tarih</label>
+                  <label className="block font-semibold text-brand-950 mb-1">Tarih</label>
                   <input
                     type="date"
                     required
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs"
+                    className="w-full px-3 py-2 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 text-xs shadow-2xs bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Başlangıç Saati</label>
+                  <label className="block font-semibold text-brand-950 mb-1">Başlangıç Saati (15 dk)</label>
                   <select
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs font-semibold"
+                    className="w-full px-3 py-2 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 text-xs font-mono font-bold shadow-2xs bg-white"
                   >
-                    {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'].map((h) => (
-                      <option key={h} value={h}>
-                        {h}
-                      </option>
-                    ))}
+                    {(() => {
+                      const slots: string[] = [];
+                      for (let hour = 10; hour <= 20; hour++) {
+                        for (let min = 0; min < 60; min += 15) {
+                          slots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
+                        }
+                      }
+                      slots.push('21:00');
+                      return slots.map((h) => (
+                        <option key={h} value={h}>
+                          {h}
+                        </option>
+                      ));
+                    })()}
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Not (Opsiyonel)</label>
+                <label className="block font-semibold text-brand-950 mb-1">Not (Opsiyonel)</label>
                 <input
                   type="text"
                   placeholder="Müşteri talepleri veya özel istekler..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 text-xs shadow-2xs"
                 />
               </div>
 
@@ -347,13 +356,13 @@ export default function StaffPortalPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="w-1/2 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer"
+                  className="w-1/2 py-2.5 rounded-xl border border-brand-200 text-brand-800 hover:bg-brand-50 font-semibold cursor-pointer"
                 >
                   Vazgeç
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer shadow-xs"
+                  className="w-1/2 py-2.5 rounded-xl bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 text-white font-semibold cursor-pointer shadow-md shadow-brand-900/10"
                 >
                   Randevuyu Kaydet
                 </button>

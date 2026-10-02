@@ -24,6 +24,7 @@ import {
   Boxes,
   Clock,
   UserCheck,
+  Sparkles,
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -61,27 +62,27 @@ export default function Sidebar() {
   return (
     <>
       {/* 1. DESKTOP SIDEBAR (Visible on md and up) */}
-      <aside className="hidden md:flex w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-4rem)] flex-col justify-between p-4 text-slate-700 shrink-0">
+      <aside className="hidden md:flex w-64 bg-white border-r border-brand-100 min-h-[calc(100vh-4rem)] flex-col justify-between p-4 text-brand-950 shrink-0">
         <div className="space-y-5">
           {/* User Profile Card */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div className="p-3.5 rounded-xl bg-brand-50/60 border border-brand-100/80">
             <div className="flex items-center space-x-3">
               <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-xs text-white ${
-                  isAdmin ? 'bg-blue-600 shadow-xs' : 'bg-slate-700'
+                className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-xs text-white shadow-xs ${
+                  isAdmin ? 'bg-brand-700 shadow-brand-700/20' : 'bg-brand-900'
                 }`}
               >
-                {isAdmin ? <Shield className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                {isAdmin ? <Shield className="w-4 h-4 text-amber-200" /> : <User className="w-4 h-4" />}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-slate-900 truncate">{currentUser.name}</p>
+                <p className="text-xs font-bold text-brand-950 truncate">{currentUser.name}</p>
                 <div className="flex items-center space-x-1.5 mt-0.5">
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
-                      isAdmin ? 'bg-blue-600' : 'bg-emerald-500'
+                      isAdmin ? 'bg-brand-600' : 'bg-emerald-500'
                     }`}
                   />
-                  <span className="text-[11px] text-slate-500 font-medium">
+                  <span className="text-[11px] text-brand-800 font-medium">
                     {isAdmin ? 'Salon Sahibi (Yönetici)' : `Personel: ${currentUser.staffId}`}
                   </span>
                 </div>
@@ -91,8 +92,8 @@ export default function Sidebar() {
 
           {/* Navigation Links */}
           <div>
-            <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-              {isAdmin ? 'YÖNETİM MENÜSÜ' : 'ÇALIŞAN ALANI'}
+            <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-brand-400 uppercase">
+              {isAdmin ? 'BAGE YÖNETİM MENÜSÜ' : 'ÇALIŞAN ALANI'}
             </div>
             <nav className="space-y-1">
               {navItems.map((item) => {
@@ -104,20 +105,20 @@ export default function Sidebar() {
                     href={item.href}
                     className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition ${
                       isActive
-                        ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-brand-50 text-brand-800 font-bold border-l-4 border-brand-700 border-y border-r border-brand-100 shadow-xs'
+                        : 'text-brand-900 hover:bg-brand-50/50 hover:text-brand-700'
                     }`}
                   >
                     <div className="flex items-center space-x-2.5">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
-                      <span>{item.name}</span>
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-brand-700' : 'text-brand-600/70'}`} />
+                      <span className="tracking-tight">{item.name}</span>
                     </div>
                     {item.badge && (
                       <span
                         className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
                           isActive
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-100 text-slate-600 border border-slate-200'
+                            ? 'bg-brand-700 text-white'
+                            : 'bg-brand-100/70 text-brand-800 border border-brand-200/50'
                         }`}
                       >
                         {item.badge}
@@ -131,12 +132,12 @@ export default function Sidebar() {
 
           {/* Confidentiality Notice for Staff */}
           {!isAdmin && (
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-              <div className="flex items-center space-x-1.5 text-slate-800 font-bold text-xs">
-                <Lock className="w-3.5 h-3.5 text-blue-600" />
+            <div className="p-3.5 rounded-xl bg-brand-50/50 border border-brand-100 space-y-1.5">
+              <div className="flex items-center space-x-1.5 text-brand-950 font-bold text-xs">
+                <Lock className="w-3.5 h-3.5 text-brand-700" />
                 <span>Kasa Gizliliği Aktif</span>
               </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
+              <p className="text-[11px] text-brand-700/80 leading-relaxed">
                 İşletmenin kasa, ciro ve mali kayıtları yalnızca salon sahibi tarafından görüntülenebilir.
               </p>
             </div>
@@ -144,21 +145,22 @@ export default function Sidebar() {
         </div>
 
         {/* Desktop Footer */}
-        <div className="pt-3 border-t border-slate-200 space-y-2">
+        <div className="pt-3 border-t border-brand-100 space-y-2">
           <Link
             href={`/book/${tenant.slug}`}
             target="_blank"
-            className="flex items-center justify-between text-xs font-semibold text-slate-700 hover:text-blue-700 p-2 rounded-lg hover:bg-slate-50 border border-slate-200 transition"
+            className="flex items-center justify-between text-xs font-semibold text-brand-800 hover:text-brand-950 p-2 rounded-lg hover:bg-brand-50 bg-brand-50/40 border border-brand-200 transition"
           >
             <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-blue-600" />
-              <span>Online Randevu Linki</span>
+              <Calendar className="w-4 h-4 text-brand-700" />
+              <span className="text-brand-800 font-bold">Online Randevu Linki</span>
             </div>
-            <ExternalLink className="w-3 h-3 text-slate-400" />
+            <ExternalLink className="w-3 h-3 text-brand-600" />
           </Link>
-          <p className="text-[10px] text-slate-400 text-center font-medium">
-            UCE Bilişim • Randevu Sistemi
-          </p>
+          <div className="text-[10px] text-brand-400 text-center font-medium flex items-center justify-center space-x-1">
+            <Sparkles className="w-3 h-3 text-brand-400" />
+            <span>BAGENailStudio • UCE Bilişim</span>
+          </div>
         </div>
       </aside>
 
@@ -168,7 +170,7 @@ export default function Sidebar() {
           {/* Backdrop overlay */}
           <div
             onClick={() => setIsMobileMenuOpen(false)}
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-brand-950/60 backdrop-blur-xs transition-opacity"
             aria-hidden="true"
           />
 
@@ -176,33 +178,37 @@ export default function Sidebar() {
           <div className="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-2xl z-50 flex flex-col justify-between p-4 overflow-y-auto">
             <div className="space-y-5">
               {/* Drawer Header with Close Button */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold">
-                    <Calendar className="w-4 h-4" />
+              <div className="flex items-center justify-between pb-3 border-b border-brand-100">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-9 h-9 rounded-xl overflow-hidden shadow-xs border border-brand-200 bg-brand-900 shrink-0">
+                    <img
+                      src="/bage-logo.jpg"
+                      alt="BAGE Nail Studio"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
-                    <h2 className="font-bold text-xs text-slate-900 tracking-tight truncate max-w-[170px]">
-                      {tenant.name}
+                    <h2 className="font-bold text-xs text-brand-950 tracking-tight truncate max-w-[170px]">
+                      BAGE Nail Studio | Beaute
                     </h2>
-                    <span className="text-[10px] font-semibold text-blue-600">
-                      UCE Randevu Paneli
+                    <span className="text-[10px] font-semibold text-brand-700">
+                      Bagenailstudiobeaute.com
                     </span>
                   </div>
                 </div>
 
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                  className="p-1.5 text-brand-600 hover:text-brand-950 hover:bg-brand-50 rounded-lg transition cursor-pointer"
                   aria-label="Menüyü Kapat"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 text-brand-700" />
                 </button>
               </div>
 
-              {/* Mobile Role Switcher (Super Handy on Phone) */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-                <div className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+              {/* Mobile Role Switcher */}
+              <div className="p-3 bg-brand-50/50 rounded-xl border border-brand-100 space-y-2">
+                <div className="text-[10px] font-bold tracking-wider text-brand-400 uppercase">
                   AKTİF KULLANICI ROLÜ
                 </div>
                 <div className="space-y-1.5">
@@ -213,12 +219,12 @@ export default function Sidebar() {
                     }}
                     className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-semibold transition cursor-pointer ${
                       isAdmin
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                        ? 'bg-brand-700 text-white shadow-xs'
+                        : 'bg-white text-brand-800 hover:bg-brand-50 border border-brand-200'
                     }`}
                   >
                     <div className="flex items-center space-x-2">
-                      <ShieldCheck className="w-4 h-4" />
+                      <ShieldCheck className="w-4 h-4 text-amber-300" />
                       <span>Salon Sahibi (Yönetici)</span>
                     </div>
                     {isAdmin && <span className="text-[10px] font-bold">Aktif</span>}
@@ -237,11 +243,11 @@ export default function Sidebar() {
                           }}
                           className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium transition truncate cursor-pointer ${
                             isStaffActive
-                              ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                              ? 'bg-brand-800 text-white font-bold shadow-xs'
+                              : 'bg-white text-brand-800 hover:bg-brand-50 border border-brand-100'
                           }`}
                         >
-                          <User className="w-3.5 h-3.5 shrink-0" />
+                          <User className="w-3.5 h-3.5 shrink-0 text-brand-600" />
                           <span className="truncate">{s.name.split(' ')[0]} ({s.staffCode})</span>
                         </button>
                       );
@@ -252,7 +258,7 @@ export default function Sidebar() {
 
               {/* Navigation Menu */}
               <div>
-                <div className="px-1 mb-2 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                <div className="px-1 mb-2 text-[10px] font-bold tracking-wider text-brand-400 uppercase">
                   {isAdmin ? 'YÖNETİM MENÜSÜ' : 'ÇALIŞAN MENÜSÜ'}
                 </div>
                 <nav className="space-y-1">
@@ -266,26 +272,26 @@ export default function Sidebar() {
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
                           isActive
-                            ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100'
-                            : 'text-slate-700 hover:bg-slate-50'
+                            ? 'bg-brand-50 text-brand-800 font-bold border-l-4 border-brand-700 border-y border-r border-brand-100'
+                            : 'text-brand-900 hover:bg-brand-50/50'
                         }`}
                       >
                         <div className="flex items-center space-x-3">
-                          <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
-                          <span>{item.name}</span>
+                          <Icon className={`w-4 h-4 ${isActive ? 'text-brand-700' : 'text-brand-600'}`} />
+                          <span className="text-brand-900 font-medium">{item.name}</span>
                         </div>
                         {item.badge ? (
                           <span
                             className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
                               isActive
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-slate-100 text-slate-600'
+                                ? 'bg-brand-700 text-white'
+                                : 'bg-brand-100 text-brand-800'
                             }`}
                           >
                             {item.badge}
                           </span>
                         ) : (
-                          <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                          <ChevronRight className="w-3.5 h-3.5 text-brand-300" />
                         )}
                       </Link>
                     );
@@ -295,12 +301,12 @@ export default function Sidebar() {
 
               {/* Confidentiality Warning for Staff */}
               {!isAdmin && (
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                  <div className="flex items-center space-x-1.5 text-slate-800 font-bold text-xs">
-                    <Lock className="w-3.5 h-3.5 text-blue-600" />
+                <div className="p-3 rounded-xl bg-brand-50/60 border border-brand-100 space-y-1">
+                  <div className="flex items-center space-x-1.5 text-brand-950 font-bold text-xs">
+                    <Lock className="w-3.5 h-3.5 text-brand-700" />
                     <span>Kasa Gizliliği Aktif</span>
                   </div>
-                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                  <p className="text-[11px] text-brand-700/80 leading-relaxed">
                     İşletmenin kasa ve mali kayıtları gizlidir.
                   </p>
                 </div>
@@ -308,21 +314,21 @@ export default function Sidebar() {
             </div>
 
             {/* Mobile Drawer Footer */}
-            <div className="pt-3 border-t border-slate-200 space-y-2 mt-4">
+            <div className="pt-3 border-t border-brand-100 space-y-2 mt-4">
               <Link
                 href={`/book/${tenant.slug}`}
                 target="_blank"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center justify-between text-xs font-semibold text-slate-800 p-2.5 rounded-xl bg-blue-50/70 border border-blue-200 transition"
+                className="flex items-center justify-between text-xs font-semibold text-brand-800 p-2.5 rounded-xl bg-brand-50 border border-brand-200 transition"
               >
                 <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4 text-blue-600" />
-                  <span>Müşteri Randevu Sayfası</span>
+                  <Calendar className="w-4 h-4 text-brand-700" />
+                  <span className="font-bold text-brand-800">Online Randevu Linki</span>
                 </div>
-                <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                <ExternalLink className="w-3.5 h-3.5 text-brand-700" />
               </Link>
-              <p className="text-[10px] text-slate-400 text-center font-medium">
-                UCE Bilişim • Randevu ve Yönetim Sistemi
+              <p className="text-[10px] text-brand-400 text-center font-medium">
+                Bagenailstudiobeaute.com • UCE Bilişim
               </p>
             </div>
           </div>
@@ -330,7 +336,7 @@ export default function Sidebar() {
       )}
 
       {/* 3. MOBILE BOTTOM NAVIGATION BAR (Thumb-friendly, fixed at bottom on < md) */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-2 flex items-center justify-around shadow-lg">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-brand-100 py-1.5 px-2 flex items-center justify-around shadow-lg">
         {isAdmin ? (
           <>
             {/* Takvim */}
@@ -338,8 +344,8 @@ export default function Sidebar() {
               href="/admin/calendar"
               className={`flex flex-col items-center py-1 px-3 rounded-lg transition ${
                 pathname === '/admin/calendar'
-                  ? 'text-blue-600 font-bold'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? 'text-brand-700 font-bold'
+                  : 'text-brand-900/60 hover:text-brand-800'
               }`}
             >
               <Calendar className="w-5 h-5" />
@@ -351,8 +357,8 @@ export default function Sidebar() {
               href="/admin/finance"
               className={`flex flex-col items-center py-1 px-3 rounded-lg transition ${
                 pathname === '/admin/finance'
-                  ? 'text-blue-600 font-bold'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? 'text-brand-700 font-bold'
+                  : 'text-brand-900/60 hover:text-brand-800'
               }`}
             >
               <Wallet className="w-5 h-5" />
@@ -364,18 +370,18 @@ export default function Sidebar() {
               href="/admin"
               className={`flex flex-col items-center py-1 px-3 rounded-lg transition ${
                 pathname === '/admin'
-                  ? 'text-blue-600 font-bold'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? 'text-brand-700 font-bold'
+                  : 'text-brand-900/60 hover:text-brand-800'
               }`}
             >
               <LayoutDashboard className="w-5 h-5" />
-              <span className="text-[10px] mt-0.5">Genel Bakış</span>
+              <span className="text-[10px] mt-0.5">Özet</span>
             </Link>
 
             {/* Menü Açıcı */}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="flex flex-col items-center py-1 px-3 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer"
+              className="flex flex-col items-center py-1 px-3 rounded-lg text-brand-900/60 hover:text-brand-800 transition cursor-pointer"
             >
               <Menu className="w-5 h-5" />
               <span className="text-[10px] mt-0.5">Menü</span>
@@ -388,8 +394,8 @@ export default function Sidebar() {
               href="/staff"
               className={`flex flex-col items-center py-1 px-4 rounded-lg transition ${
                 pathname === '/staff'
-                  ? 'text-blue-600 font-bold'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? 'text-brand-700 font-bold'
+                  : 'text-brand-900/60 hover:text-brand-800'
               }`}
             >
               <Calendar className="w-5 h-5" />
@@ -399,7 +405,7 @@ export default function Sidebar() {
             {/* Menü Açıcı */}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="flex flex-col items-center py-1 px-4 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer"
+              className="flex flex-col items-center py-1 px-4 rounded-lg text-brand-900/60 hover:text-brand-800 transition cursor-pointer"
             >
               <Menu className="w-5 h-5" />
               <span className="text-[10px] mt-0.5">Menü & Profil</span>

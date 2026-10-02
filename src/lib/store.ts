@@ -24,20 +24,21 @@ const fortyEightDaysAgo = new Date(Date.now() - 48 * 24 * 60 * 60 * 1000).toISOS
 // 10 gün önce
 const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-// Tenant: BAGE Güzellik & Tırnak Stüdyosu
+// Tenant: BAGE Nail Studio | Beaute
 export const initialTenant: Tenant = {
   id: 'tenant-bage',
-  name: 'BAGE Güzellik & Tırnak Stüdyosu',
+  name: 'BAGE Nail Studio | Beaute',
   slug: 'bage-studio',
   phone: '+90 212 555 12 34',
   address: 'Teşvikiye Cad. No:28 D:4 Nişantaşı, Şişli / İstanbul',
   currency: '₺',
+  logoUrl: '/bage-logo.jpg',
   plan: 'ENTERPRISE',
   isActive: true,
   whatsappConnected: true,
   whatsappNumber: '+90 532 999 88 77',
   instagramConnected: true,
-  instagramHandle: '@bagestudio',
+  instagramHandle: '@bage.nailstudio',
   monthlyTarget: 180000, // 180.000 ₺ Aylık Hedef Ciro
   dailyTarget: 7500,     // 7.500 ₺ Günlük Hedef Ciro
   createdAt: '2026-01-01',
@@ -54,14 +55,17 @@ export const initialStaff: Staff[] = [
     phone: '+90 533 111 22 33',
     avatarColor: 'bg-rose-500',
     isActive: true,
+    canPerformServices: true,
+    baseSalary: 35000,
     commissionRate: 40,
     workingHours: {
-      start: '09:00',
-      end: '19:00',
+      start: '10:00',
+      end: '20:00',
       days: [1, 2, 3, 4, 5, 6],
     },
     offDays: [7], // Pazar izinli
     leaveDates: [],
+    leaveRecords: [],
   },
   {
     id: 'staff-2',
@@ -72,6 +76,8 @@ export const initialStaff: Staff[] = [
     phone: '+90 533 222 33 44',
     avatarColor: 'bg-purple-500',
     isActive: true,
+    canPerformServices: true,
+    baseSalary: 32000,
     commissionRate: 35,
     workingHours: {
       start: '10:00',
@@ -80,6 +86,14 @@ export const initialStaff: Staff[] = [
     },
     offDays: [1], // Pazartesi izinli
     leaveDates: ['2026-09-22'], // Özel izinli gün
+    leaveRecords: [
+      {
+        id: 'leave-1',
+        date: '2026-09-22',
+        type: 'UNPAID',
+        notes: 'Özel iş izni (Ücretsiz)',
+      },
+    ],
   },
   {
     id: 'staff-3',
@@ -90,14 +104,24 @@ export const initialStaff: Staff[] = [
     phone: '+90 533 333 44 55',
     avatarColor: 'bg-emerald-600',
     isActive: true,
+    canPerformServices: true,
+    baseSalary: 30000,
     commissionRate: 35,
     workingHours: {
-      start: '09:00',
-      end: '18:00',
+      start: '10:00',
+      end: '19:00',
       days: [2, 3, 4, 5, 6, 7],
     },
     offDays: [1], // Pazartesi izinli
     leaveDates: [],
+    leaveRecords: [
+      {
+        id: 'leave-2',
+        date: '2026-09-15',
+        type: 'SICK',
+        notes: 'Grip raporu (Raporlu)',
+      },
+    ],
   },
   {
     id: 'staff-4',
@@ -108,14 +132,17 @@ export const initialStaff: Staff[] = [
     phone: '+90 533 444 55 66',
     avatarColor: 'bg-amber-500',
     isActive: true,
+    canPerformServices: true,
+    baseSalary: 30000,
     commissionRate: 35,
     workingHours: {
       start: '10:00',
-      end: '19:00',
+      end: '20:00',
       days: [1, 3, 4, 5, 6, 7],
     },
     offDays: [2], // Salı izinli
     leaveDates: [],
+    leaveRecords: [],
   },
 ];
 

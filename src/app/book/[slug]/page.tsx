@@ -3,50 +3,65 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import {
-  Calendar,
+  Calendar as CalendarIcon,
   Clock,
   MapPin,
   Phone,
-  CheckCircle2,
+  Sparkles,
+  Check,
   ChevronRight,
   ChevronLeft,
-  User,
-  MessageSquare,
+  Heart,
+  Instagram,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function PublicBookingPage({ params }: { params: { slug: string } }) {
   const { tenant, services, staffList, addAppointment } = useApp();
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Form State
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedServiceId, setSelectedServiceId] = useState<string>(services[0]?.id || '');
-  const [selectedStaffId, setSelectedStaffId] = useState<string>('ANY');
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [selectedTime, setSelectedTime] = useState<string>('11:00');
   const [customerName, setCustomerName] = useState<string>('');
   const [customerPhone, setCustomerPhone] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
 
   const selectedService = services.find((s) => s.id === selectedServiceId) || services[0];
-  const selectedStaff = staffList.find((s) => s.id === selectedStaffId);
 
   const categories = ['ALL', ...Array.from(new Set(services.map((s) => s.category)))];
   const filteredServices = selectedCategory === 'ALL'
     ? services
     : services.filter((s) => s.category === selectedCategory);
 
-  const availableHours = ['09:30', '10:30', '11:30', '13:00', '14:00', '15:30', '16:30', '17:30', '18:30'];
+  // 10:00 - 21:00 arası 15 dakikalık randevu aralıkları (Müşteri talebi)
+  const generate15MinIntervals = () => {
+    const slots: string[] = [];
+    for (let hour = 10; hour <= 20; hour++) {
+      for (let min = 0; min < 60; min += 15) {
+        const hStr = hour.toString().padStart(2, '0');
+        const mStr = min.toString().padStart(2, '0');
+        slots.push(`${hStr}:${mStr}`);
+      }
+    }
+    slots.push('21:00');
+    return slots;
+  };
 
+  const availableHours = generate15MinIntervals();
+
+  // "BAGE'ye Talep Oluştur" gönderildiğinde
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerName || !customerPhone) return;
+    if (!customerName || !customerPhone || !selectedService) return;
 
-    let assignedStaffId = selectedStaffId;
-    if (assignedStaffId === 'ANY') {
-      assignedStaffId = staffList[0]?.id || 'staff-1';
-    }
+    // Otomatik "İlk Müsait Uzman" ataması (İşlem yetkisi aktif olanlar arasından)
+    const eligibleStaff = staffList.filter((s) => s.isActive && (s.canPerformServices !== false));
+    const assignedStaffId = eligibleStaff[0]?.id || staffList[0]?.id || 'staff-1';
 
     const duration = selectedService?.durationMinutes || 60;
     const [h, m] = selectedTime.split(':').map(Number);
@@ -66,84 +81,160 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
       endTime,
       status: 'CONFIRMED',
       price: selectedService.price,
-      notes,
+      notes: notes ? `[Online Talep] ${notes}` : '[Online Talep - İlk Müsait Uzman]',
       depositAmount: 0,
       depositPaid: false,
     });
 
-    setStep(5);
+    setShowSuccessModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowSuccessModal(false);
+    setStep(1);
+    setCustomerName('');
+    setCustomerPhone('');
+    setNotes('');
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-between">
-      {/* Top Banner */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-2xl mx-auto px-4 py-3.5 flex items-center justify-between">
+    <div className="min-h-screen bg-[#FAF7F5] text-slate-800 flex flex-col justify-between selection:bg-brand-100 selection:text-brand-900">
+      {/* ALA Beauté Club Estetiğinde Üst Bilgi Barı */}
+      <div className="bg-[#800020] text-amber-100/90 text-[11px] py-1.5 px-4 font-medium tracking-wider flex items-center justify-between">
+        <div className="flex items-center space-x-3 mx-auto sm:mx-0">
+          <span className="flex items-center space-x-1">
+            <Sparkles className="w-3 h-3 text-amber-300" />
+            <span>Nişantaşı / İstanbul</span>
+          </span>
+          <span className="hidden sm:inline">•</span>
+          <span className="hidden sm:inline">Çalışma Saatleri: 10:00 - 21:00</span>
+        </div>
+        <div className="hidden sm:flex items-center space-x-4 text-[11px]">
+          <a
+            href="https://www.instagram.com/bage.nailstudio/"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-white flex items-center space-x-1 transition"
+          >
+            <Instagram className="w-3.5 h-3.5" />
+            <span>@bage.nailstudio</span>
+          </a>
+          <a href="tel:+902125551234" className="hover:text-white font-semibold">
+            +90 212 555 12 34
+          </a>
+        </div>
+      </div>
+
+      {/* Boutique Header */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-brand-100 sticky top-0 z-30 shadow-xs">
+        <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-xs">
-              <Calendar className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-sm border border-brand-200 bg-brand-900 shrink-0">
+              <img
+                src="/bage-logo.jpg"
+                alt="BAGE Nail Studio | Beaute"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
-              <h1 className="font-bold text-sm text-slate-900 leading-tight">{tenant.name}</h1>
-              <p className="text-[11px] text-slate-500 flex items-center space-x-1 mt-0.5">
-                <MapPin className="w-3 h-3 text-slate-400" />
-                <span className="truncate">{tenant.address}</span>
+              <div className="flex items-center space-x-1.5">
+                <h1 className="font-serif font-bold text-base sm:text-lg text-brand-950 tracking-tight">
+                  BAGE Nail Studio
+                </h1>
+                <span className="text-brand-700 font-serif italic text-xs sm:text-sm font-semibold">
+                  | Beaute
+                </span>
+              </div>
+              <p className="text-[11px] text-brand-700 font-medium tracking-wide">
+                Bagenailstudiobeaute.com
               </p>
             </div>
           </div>
 
-          <a
-            href={`tel:${tenant.phone}`}
-            className="p-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs flex items-center space-x-1.5 transition"
-          >
-            <Phone className="w-3.5 h-3.5 text-blue-600" />
-            <span className="hidden sm:inline font-semibold">Ara</span>
-          </a>
+          <div className="flex items-center space-x-2">
+            <a
+              href="https://www.instagram.com/bage.nailstudio/"
+              target="_blank"
+              rel="noreferrer"
+              className="p-2 rounded-full bg-brand-50 hover:bg-brand-100 text-brand-800 text-xs font-semibold flex items-center transition border border-brand-200"
+              title="Instagram: @bage.nailstudio"
+            >
+              <Instagram className="w-4 h-4 text-brand-700" />
+            </a>
+            <a
+              href="tel:+902125551234"
+              className="px-3 py-1.5 rounded-full bg-brand-50 hover:bg-brand-100 text-brand-800 text-xs font-semibold flex items-center space-x-1.5 transition border border-brand-200"
+            >
+              <Phone className="w-3.5 h-3.5 text-brand-700" />
+              <span className="hidden sm:inline">İletişim</span>
+            </a>
+          </div>
         </div>
       </header>
 
-      {/* Main Booking Container */}
-      <main className="max-w-2xl w-full mx-auto px-4 py-6 flex-1">
-        {/* Step Progress */}
-        {step < 5 && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
-              <span className={step >= 1 ? 'text-blue-600' : ''}>1. Hizmet</span>
-              <span className={step >= 2 ? 'text-blue-600' : ''}>2. Uzman</span>
-              <span className={step >= 3 ? 'text-blue-600' : ''}>3. Saat</span>
-              <span className={step >= 4 ? 'text-blue-600' : ''}>4. Onay</span>
-            </div>
-            <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-              <div
-                className="bg-blue-600 h-full transition-all duration-300 rounded-full"
-                style={{ width: `${(step / 4) * 100}%` }}
-              />
-            </div>
+      {/* Main Booking Container (Mobile-First Centered Card) */}
+      <main className="max-w-xl w-full mx-auto px-4 py-5 flex-1">
+        {/* Banner Title requested by client: "BAGE Online Randevu Sistemi" */}
+        <div className="text-center mb-6 pt-2">
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-semibold mb-2">
+            <Sparkles className="w-3 h-3 text-brand-700" />
+            <span>BAGE Online Randevu Sistemi</span>
           </div>
-        )}
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-brand-950 tracking-tight">
+            Özel Randevu Talebi
+          </h2>
+          <p className="text-xs text-brand-800/80 max-w-sm mx-auto mt-1 font-normal leading-relaxed">
+            İstediğiniz bakımı ve size en uygun saat dilimini seçerek saniyeler içinde talep oluşturun.
+          </p>
+        </div>
+
+        {/* Step Progress Pill */}
+        <div className="mb-6 bg-white p-2.5 rounded-2xl border border-brand-100 shadow-xs">
+          <div className="flex items-center justify-between text-xs font-semibold px-2 mb-1.5">
+            <span className={step >= 1 ? 'text-brand-800 font-bold' : 'text-slate-400'}>
+              1. Hizmet Seçimi
+            </span>
+            <span className={step >= 2 ? 'text-brand-800 font-bold' : 'text-slate-400'}>
+              2. Tarih & Saat
+            </span>
+            <span className={step >= 3 ? 'text-brand-800 font-bold' : 'text-slate-400'}>
+              3. İletişim & Talep
+            </span>
+          </div>
+          <div className="w-full bg-brand-50 h-2 rounded-full overflow-hidden p-0.5 border border-brand-100">
+            <div
+              className="bg-brand-700 h-full transition-all duration-300 rounded-full"
+              style={{ width: `${(step / 3) * 100}%` }}
+            />
+          </div>
+        </div>
 
         {/* STEP 1: Select Service */}
         {step === 1 && (
           <div className="space-y-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-100 shadow-xs space-y-3">
               <div>
-                <h2 className="text-base font-bold text-slate-900">Hizmet Seçiniz</h2>
-                <p className="text-xs text-slate-500">Almak istediğiniz bakım veya uygulama türünü belirleyin</p>
+                <h3 className="text-sm sm:text-base font-serif font-bold text-brand-950">
+                  Uygulama & Hizmet Kataloğu
+                </h3>
+                <p className="text-xs text-brand-700/70">
+                  Almak istediğiniz bakımı aşağıdan seçin
+                </p>
               </div>
 
               {/* Category Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                 {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                       selectedCategory === cat
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        ? 'bg-brand-700 text-white shadow-xs'
+                        : 'bg-brand-50 text-brand-800 hover:bg-brand-100 border border-brand-200/50'
                     }`}
                   >
-                    {cat === 'ALL' ? 'Tümü' : cat}
+                    {cat === 'ALL' ? 'Tüm Hizmetler' : cat}
                   </button>
                 ))}
               </div>
@@ -157,28 +248,39 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
                   <div
                     key={srv.id}
                     onClick={() => setSelectedServiceId(srv.id)}
-                    className={`p-4 rounded-xl border cursor-pointer transition flex items-center justify-between ${
+                    className={`p-4 rounded-2xl border cursor-pointer transition flex items-center justify-between ${
                       isSelected
-                        ? 'bg-blue-50/70 border-blue-600 shadow-xs'
-                        : 'bg-white hover:bg-slate-50 border-slate-200'
+                        ? 'bg-brand-50/80 border-brand-600 shadow-xs ring-1 ring-brand-600'
+                        : 'bg-white hover:bg-brand-50/30 border-brand-100'
                     }`}
                   >
-                    <div className="space-y-1">
+                    <div className="space-y-1 pr-3">
                       <div className="flex items-center space-x-2">
-                        <h3 className="font-bold text-sm text-slate-900">{srv.name}</h3>
-                        <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                          {srv.durationMinutes} dk
+                        <h4 className="font-bold text-sm text-brand-950">{srv.name}</h4>
+                      </div>
+                      <div className="flex items-center space-x-2 text-[11px] text-brand-700">
+                        <span className="bg-brand-100/70 px-2 py-0.5 rounded-md font-medium">
+                          {srv.durationMinutes} dakika
                         </span>
+                        <span className="text-slate-400">•</span>
+                        <span className="text-brand-800 font-medium">{srv.category}</span>
                       </div>
                       {srv.description && (
-                        <p className="text-xs text-slate-500 line-clamp-1">{srv.description}</p>
+                        <p className="text-xs text-slate-500 pt-0.5 leading-relaxed">
+                          {srv.description}
+                        </p>
                       )}
                     </div>
 
-                    <div className="text-right shrink-0 ml-3">
-                      <span className="text-sm font-bold text-blue-700">
+                    <div className="text-right shrink-0">
+                      <span className="text-base font-bold text-brand-800 font-serif">
                         {srv.price} {tenant.currency}
                       </span>
+                      {isSelected && (
+                        <div className="w-5 h-5 rounded-full bg-brand-700 text-white flex items-center justify-center ml-auto mt-1">
+                          <Check className="w-3 h-3" />
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -187,105 +289,53 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
 
             <button
               onClick={() => setStep(2)}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition flex items-center justify-center space-x-2 shadow-xs cursor-pointer mt-4"
+              className="w-full py-3.5 bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 text-white font-bold text-xs sm:text-sm rounded-2xl transition flex items-center justify-center space-x-2 shadow-md shadow-brand-900/10 cursor-pointer mt-4"
             >
-              <span>Uzman Seçimiyle Devam Et</span>
+              <span>Tarih ve Saat Seçimiyle Devam Et</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        {/* STEP 2: Select Staff */}
+        {/* STEP 2: Select Date & 15-Minute Time Slot */}
         {step === 2 && (
           <div className="space-y-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-              <h2 className="text-base font-bold text-slate-900">Uzman / Personel Seçiniz</h2>
-              <p className="text-xs text-slate-500">Hizmeti almak istediğiniz uzmanı seçebilir veya ilk boş uzmanı tercih edebilirsiniz.</p>
-            </div>
-
-            <div className="space-y-2.5">
-              {/* Any Staff Option */}
-              <div
-                onClick={() => setSelectedStaffId('ANY')}
-                className={`p-4 rounded-xl border cursor-pointer transition flex items-center space-x-3.5 ${
-                  selectedStaffId === 'ANY'
-                    ? 'bg-blue-50/70 border-blue-600 shadow-xs'
-                    : 'bg-white hover:bg-slate-50 border-slate-200'
-                }`}
-              >
-                <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xs">
-                  ⚡
-                </div>
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-100 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-sm text-slate-900">İlk Müsait Uzman (Farketmez)</h3>
-                  <p className="text-xs text-slate-500">En erken boşlukta en hızlı randevu</p>
+                  <h3 className="text-sm sm:text-base font-serif font-bold text-brand-950">
+                    Randevu Tarihi
+                  </h3>
+                  <p className="text-xs text-brand-700/70">
+                    Geleceğiniz günü belirleyin
+                  </p>
+                </div>
+                <div className="px-2.5 py-1 rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-[11px] font-semibold flex items-center space-x-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-brand-700" />
+                  <span>İlk Müsait Uzman</span>
                 </div>
               </div>
 
-              {/* Specific Staff */}
-              {staffList.map((staff) => {
-                const isSelected = selectedStaffId === staff.id;
-
-                return (
-                  <div
-                    key={staff.id}
-                    onClick={() => setSelectedStaffId(staff.id)}
-                    className={`p-4 rounded-xl border cursor-pointer transition flex items-center space-x-3.5 ${
-                      isSelected
-                        ? 'bg-blue-50/70 border-blue-600 shadow-xs'
-                        : 'bg-white hover:bg-slate-50 border-slate-200'
-                    }`}
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm">
-                      {staff.name.charAt(0)}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-sm text-slate-900">{staff.name}</h3>
-                      <p className="text-xs text-slate-500">{staff.title}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="flex items-center space-x-2 pt-2">
-              <button
-                onClick={() => setStep(1)}
-                className="w-1/3 py-3 rounded-xl border border-slate-200 bg-white font-semibold text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-              >
-                Geri
-              </button>
-              <button
-                onClick={() => setStep(3)}
-                className="w-2/3 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition flex items-center justify-center space-x-2 shadow-xs cursor-pointer"
-              >
-                <span>Tarih & Saat Seç</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3: Select Date & Time */}
-        {step === 3 && (
-          <div className="space-y-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-              <h2 className="text-base font-bold text-slate-900">Tarih ve Saat Seçiniz</h2>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Randevu Tarihi</label>
                 <input
                   type="date"
                   value={selectedDate}
                   min={new Date().toISOString().split('T')[0]}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 bg-white text-xs sm:text-sm font-semibold text-brand-950 focus:outline-hidden focus:border-brand-600 focus:ring-1 focus:ring-brand-600 shadow-2xs"
                 />
               </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-              <label className="block text-xs font-semibold text-slate-700">Müsait Başlangıç Saatleri</label>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-100 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs sm:text-sm font-serif font-bold text-brand-950">
+                  Müsait Saat Dilimi (10:00 - 21:00)
+                </label>
+                <span className="text-[11px] font-medium text-brand-700">15 dk aralıklarla</span>
+              </div>
+
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 max-h-64 overflow-y-auto pr-1">
                 {availableHours.map((time) => {
                   const isSelected = selectedTime === time;
 
@@ -294,10 +344,10 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
                       key={time}
                       type="button"
                       onClick={() => setSelectedTime(time)}
-                      className={`py-2 px-3 rounded-lg text-xs font-mono font-bold transition cursor-pointer border ${
+                      className={`py-2 px-1 rounded-xl text-xs font-mono font-bold transition cursor-pointer border text-center ${
                         isSelected
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                          ? 'bg-brand-700 text-white border-brand-700 shadow-xs ring-1 ring-brand-700'
+                          : 'bg-brand-50/50 text-brand-900 border-brand-100 hover:bg-brand-100/60'
                       }`}
                     >
                       {time}
@@ -309,157 +359,209 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
 
             <div className="flex items-center space-x-2 pt-2">
               <button
-                onClick={() => setStep(2)}
-                className="w-1/3 py-3 rounded-xl border border-slate-200 bg-white font-semibold text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                onClick={() => setStep(1)}
+                className="w-1/3 py-3.5 rounded-2xl border border-brand-200 bg-white font-semibold text-xs text-brand-800 hover:bg-brand-50 transition cursor-pointer"
               >
                 Geri
               </button>
               <button
-                onClick={() => setStep(4)}
-                className="w-2/3 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition flex items-center justify-center space-x-2 shadow-xs cursor-pointer"
+                onClick={() => setStep(3)}
+                className="w-2/3 py-3.5 rounded-2xl bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 text-white font-bold text-xs sm:text-sm transition flex items-center justify-center space-x-2 shadow-md shadow-brand-900/10 cursor-pointer"
               >
-                <span>İletişim Bilgilerine Geç</span>
+                <span>İletişim & Talep Oluştur</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 4: Customer Details & Confirmation */}
-        {step === 4 && (
+        {/* STEP 3: Customer Details & "BAGE’ye Talep Oluştur" */}
+        {step === 3 && (
           <form onSubmit={handleBookingSubmit} className="space-y-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-              <h2 className="text-base font-bold text-slate-900">İletişim Bilgileriniz</h2>
-              <p className="text-xs text-slate-500">Randevu teyidi WhatsApp üzerinden cep telefonunuza iletilecektir.</p>
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-100 shadow-xs space-y-3">
+              <h3 className="text-sm sm:text-base font-serif font-bold text-brand-950">
+                İletişim & Onay Bilgileri
+              </h3>
+              <p className="text-xs text-brand-700/80">
+                Randevunuzun teyidi ve detaylı bilgilendirme için iletişim bilgilerinizi giriniz.
+              </p>
 
               <div className="space-y-3 pt-2 text-xs">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Adınız Soyadınız *</label>
+                  <label className="block font-semibold text-brand-950 mb-1">
+                    Adınız Soyadınız *
+                  </label>
                   <input
                     type="text"
                     required
-                    placeholder="Örn: Ayşe Yılmaz"
+                    placeholder="Örn: Buse Yıldız"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs font-medium"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-600 focus:ring-1 focus:ring-brand-600 text-xs sm:text-sm font-medium text-slate-900 shadow-2xs"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Cep Telefonu Numaranız *</label>
+                  <label className="block font-semibold text-brand-950 mb-1">
+                    Cep Telefonu Numaranız *
+                  </label>
                   <input
                     type="tel"
                     required
                     placeholder="0532 123 45 67"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs font-medium"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-600 focus:ring-1 focus:ring-brand-600 text-xs sm:text-sm font-medium text-slate-900 shadow-2xs"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Özel İstek / Not (Opsiyonel)</label>
+                  <label className="block font-semibold text-brand-950 mb-1">
+                    Özel İstek / Not (Opsiyonel)
+                  </label>
                   <textarea
                     rows={2}
-                    placeholder="Tırnak modeli, referans görsel veya özel talepleriniz..."
+                    placeholder="Tırnak modeli, referans tasarım veya özel istekleriniz..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 text-xs"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-600 focus:ring-1 focus:ring-brand-600 text-xs text-slate-900 shadow-2xs"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Summary Card */}
-            <div className="bg-slate-100 p-4 rounded-xl border border-slate-200 space-y-2 text-xs text-slate-700">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Hizmet:</span>
-                <strong>{selectedService.name}</strong>
+            {/* Selected Booking Summary */}
+            <div className="bg-white p-4 rounded-2xl border border-brand-200 space-y-2.5 text-xs text-brand-900 shadow-xs">
+              <div className="flex justify-between items-center pb-2 border-b border-brand-100">
+                <span className="text-brand-700/80">Seçilen Hizmet:</span>
+                <strong className="text-brand-950 font-bold">{selectedService.name}</strong>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Uzman:</span>
-                <strong>{selectedStaffId === 'ANY' ? 'İlk Müsait Uzman' : selectedStaff?.name}</strong>
+              <div className="flex justify-between items-center pb-2 border-b border-brand-100">
+                <span className="text-brand-700/80">Uzman:</span>
+                <span className="px-2 py-0.5 bg-brand-50 border border-brand-200 text-brand-800 rounded-md font-semibold text-[11px]">
+                  İlk Müsait Uzman
+                </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Tarih & Saat:</span>
-                <strong>{selectedDate} • {selectedTime}</strong>
+              <div className="flex justify-between items-center pb-2 border-b border-brand-100">
+                <span className="text-brand-700/80">Tarih & Saat:</span>
+                <strong className="text-brand-950 font-semibold">{selectedDate} • {selectedTime}</strong>
               </div>
-              <div className="flex justify-between pt-1 border-t border-slate-200 text-sm">
-                <span className="font-bold text-slate-900">Toplam Ücret:</span>
-                <strong className="text-blue-700">{selectedService.price} {tenant.currency}</strong>
+              <div className="flex justify-between items-center pt-1 text-sm">
+                <span className="font-serif font-bold text-brand-950">Toplam Tutar:</span>
+                <strong className="text-brand-800 font-serif font-bold text-base">
+                  {selectedService.price} {tenant.currency}
+                </strong>
               </div>
             </div>
 
             <div className="flex items-center space-x-2 pt-2">
               <button
                 type="button"
-                onClick={() => setStep(3)}
-                className="w-1/3 py-3 rounded-xl border border-slate-200 bg-white font-semibold text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                onClick={() => setStep(2)}
+                className="w-1/3 py-3.5 rounded-2xl border border-brand-200 bg-white font-semibold text-xs text-brand-800 hover:bg-brand-50 transition cursor-pointer"
               >
                 Geri
               </button>
+              {/* Exact button requested: "BAGE’ye Talep Oluştur" */}
               <button
                 type="submit"
-                className="w-2/3 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shadow-xs cursor-pointer"
+                className="w-2/3 py-3.5 rounded-2xl bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 text-white font-bold text-xs sm:text-sm transition shadow-md shadow-brand-900/15 cursor-pointer flex items-center justify-center space-x-2"
               >
-                Randevuyu Onayla & Tamamla
+                <Sparkles className="w-4 h-4 text-amber-200" />
+                <span>BAGE’ye Talep Oluştur</span>
               </button>
             </div>
           </form>
         )}
-
-        {/* STEP 5: Success Screen */}
-        {step === 5 && (
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-5 shadow-xs max-w-lg mx-auto my-6">
-            <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto border border-emerald-100">
-              <CheckCircle2 className="w-8 h-8" />
-            </div>
-
-            <div className="space-y-1">
-              <h2 className="text-xl font-bold text-slate-900">Randevunuz Alındı!</h2>
-              <p className="text-xs text-slate-500">
-                Sayın <strong>{customerName}</strong>, randevu kaydınız başarıyla oluşturulmuştur.
-              </p>
-            </div>
-
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-left space-y-2 text-slate-700">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Hizmet:</span>
-                <strong>{selectedService.name}</strong>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Tarih & Saat:</span>
-                <strong>{selectedDate} • {selectedTime}</strong>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Tutar:</span>
-                <strong className="text-blue-700">{selectedService.price} {tenant.currency}</strong>
-              </div>
-            </div>
-
-            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 text-xs text-emerald-800 flex items-center space-x-2 text-left">
-              <MessageSquare className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Randevu detaylarınız <strong>{customerPhone}</strong> numaralı WhatsApp hattınıza gönderilmiştir.</span>
-            </div>
-
-            <button
-              onClick={() => {
-                setStep(1);
-                setCustomerName('');
-                setCustomerPhone('');
-                setNotes('');
-              }}
-              className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition cursor-pointer"
-            >
-              Yeni Bir Randevu Oluştur
-            </button>
-          </div>
-        )}
       </main>
 
-      {/* Footer */}
-      <footer className="py-4 border-t border-slate-200 text-center text-[11px] text-slate-400 bg-white">
-        Altyapı: <strong className="text-slate-600">UCE Bilişim Randevu Sistemi</strong> • Tüm Hakları Saklıdır
+      {/* SUCCESS CONFIRMATION MODAL - EXACT TEXT REQUESTED BY CLIENT */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/70 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-brand-200 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            {/* Heart / Sparkle Icon */}
+            <div className="w-16 h-16 rounded-full bg-brand-50 text-brand-700 flex items-center justify-center mx-auto border border-brand-200 shadow-inner">
+              <Heart className="w-8 h-8 fill-brand-700 text-brand-700" />
+            </div>
+
+            {/* Exact Client Text */}
+            <div className="space-y-3 text-slate-800 text-xs sm:text-sm leading-relaxed text-center px-1">
+              <p className="font-serif font-bold text-base sm:text-lg text-brand-950">
+                Talebiniz alındı. BAGE’ye göstermiş olduğunuz ilgi için teşekkür ederiz 🤍
+              </p>
+
+              <div className="py-2 px-3 bg-brand-50/70 rounded-2xl border border-brand-100/80 text-brand-900 space-y-2 text-xs">
+                <p className="font-semibold text-brand-800">
+                  Randevu talebiniz başarıyla alınmıştır.
+                </p>
+                <p>
+                  Randevunuzun kesin onayı için en kısa sürede sizinle iletişime geçeceğiz ღ
+                </p>
+              </div>
+
+              <p className="text-slate-600 text-[11px] italic">
+                Onay mesajınız tarafınıza iletilmeden randevunuz kesinleşmiş sayılmamaktadır.
+              </p>
+
+              <div className="pt-2 text-brand-900">
+                <p className="font-medium">
+                  Sizi BAGE’de ağırlamak için sabırsızlanıyoruz.
+                </p>
+                <p className="font-serif font-bold text-sm sm:text-base text-brand-800 mt-1">
+                  BAGE Nail Studio | Beaute ✨
+                </p>
+              </div>
+
+              {/* Instagram Follow Button */}
+              <div className="pt-2">
+                <a
+                  href="https://www.instagram.com/bage.nailstudio/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center space-x-2 w-full py-2.5 px-4 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-900 text-xs font-semibold border border-brand-200 transition"
+                >
+                  <Instagram className="w-4 h-4 text-brand-700" />
+                  <span>Instagram: @bage.nailstudio</span>
+                </a>
+              </div>
+            </div>
+
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={handleModalClose}
+                className="w-full py-3 rounded-2xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-brand-900/10 transition cursor-pointer"
+              >
+                Anladım, Teşekkür Ederim
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Boutique Footer */}
+      <footer className="py-4 border-t border-brand-100 text-center text-[11px] text-brand-800/60 bg-white">
+        <div className="flex items-center justify-center space-x-3 mb-1">
+          <a
+            href="https://www.instagram.com/bage.nailstudio/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center space-x-1 text-brand-700 hover:text-brand-900 font-semibold transition"
+          >
+            <Instagram className="w-3.5 h-3.5" />
+            <span>@bage.nailstudio</span>
+          </a>
+          <span>•</span>
+          <a href="tel:+902125551234" className="hover:text-brand-900 font-medium">
+            +90 212 555 12 34
+          </a>
+        </div>
+        <p className="font-medium">
+          <strong className="text-brand-900">BAGE Nail Studio | Beaute</strong> • Bagenailstudiobeaute.com
+        </p>
+        <p className="text-[10px] text-slate-400 mt-0.5">
+          UCE Bilişim Altyapısı ile Güvenli Randevu Sistemi
+        </p>
       </footer>
     </div>
   );

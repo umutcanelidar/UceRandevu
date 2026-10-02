@@ -13,151 +13,181 @@ import {
   Sparkles,
   Smartphone,
   ExternalLink,
+  Heart,
+  Phone,
+  Instagram,
 } from 'lucide-react';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-between">
-      {/* Navbar */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-[#FAF7F5] text-slate-800 flex flex-col justify-between selection:bg-brand-100 selection:text-brand-900">
+      {/* Top Banner */}
+      <div className="bg-[#800020] text-amber-100/90 text-xs py-2 px-4 font-medium tracking-wider flex items-center justify-between">
+        <div className="flex items-center space-x-2 mx-auto sm:mx-0">
+          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+          <span>BAGE Nail Studio | Beaute • Nişantaşı / İstanbul</span>
+        </div>
+        <div className="hidden sm:flex items-center space-x-4 text-xs font-semibold">
+          <a
+            href="https://www.instagram.com/bage.nailstudio/"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-white flex items-center space-x-1 transition"
+          >
+            <Instagram className="w-3.5 h-3.5" />
+            <span>@bage.nailstudio</span>
+          </a>
+          <span>•</span>
+          <a href="tel:+902125551234" className="hover:text-white">+90 212 555 12 34</a>
+        </div>
+      </div>
+
+      {/* Header */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-brand-100 sticky top-0 z-30 shadow-xs">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
-              <Calendar className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-sm border border-brand-200 bg-brand-900 shrink-0">
+              <img
+                src="/bage-logo.jpg"
+                alt="BAGE Nail Studio"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
-              <span className="font-bold text-base text-slate-900 tracking-tight">UCE Randevu</span>
+              <div className="flex items-center space-x-1.5">
+                <span className="font-serif font-bold text-base text-brand-950 tracking-tight">
+                  BAGE Nail Studio
+                </span>
+                <span className="text-brand-700 font-serif italic text-xs font-semibold">
+                  | Beaute
+                </span>
+              </div>
+              <span className="text-[10px] text-brand-600 font-medium block">
+                Bagenailstudiobeaute.com
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             <Link
-              href="/admin/calendar"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition shadow-xs flex items-center space-x-1.5"
+              href="/book/bage-studio"
+              className="px-3.5 py-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center space-x-1.5"
             >
-              <span>Yönetim Paneline Gir</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+              <span>BAGE Online Randevu</span>
+            </Link>
+
+            <Link
+              href="/yonetim-paneli"
+              className="inline-flex items-center space-x-1 px-3 py-2 bg-brand-50 hover:bg-brand-100 text-brand-900 text-xs font-bold rounded-xl border border-brand-200 transition shadow-2xs"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-brand-700" />
+              <span>Site Yönetim Paneli</span>
             </Link>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16 flex-1">
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Küçük Esnaf ve Salonlar İçin Akıllı Platform</span>
+      <main className="max-w-5xl mx-auto px-4 py-12 space-y-12 flex-1 text-center">
+        <div className="space-y-4 max-w-2xl mx-auto">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-brand-50 text-brand-800 border border-brand-200 text-xs font-semibold">
+            <Heart className="w-3.5 h-3.5 text-brand-700 fill-brand-700" />
+            <span>Nişantaşı Lüks Güzellik & Tırnak Deneyimi</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
-            Randevu, Personel ve Kasa Yönetimi <br className="hidden sm:inline" />
-            <span className="text-blue-600">Tek Bir Ekranda.</span>
+          <h1 className="text-3xl sm:text-5xl font-serif font-bold text-brand-950 tracking-tight leading-tight">
+            BAGE Nail Studio <br />
+            <span className="text-brand-700 italic">Online Randevu & İşletme Sistemi</span>
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            İşletmenizin tüm randevu akışını, personel takvimlerini ve gelir-gider kasasını tek bir ekrandan kolayca yönetin; müşterilerinize modern ve hızlı bir randevu deneyimi yaşatın.
+          <p className="text-xs sm:text-sm text-brand-800/80 leading-relaxed max-w-xl mx-auto">
+            Jel protez tırnak, kalıcı oje, medikal manikür & pedikür ve lüks bakım randevularınızı 10:00 - 21:00 saatleri arasında 15 dakikalık aralıklarla kolayca planlayın.
           </p>
 
-          <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
+          <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/admin/calendar"
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center space-x-2"
+              href="/book/bage-studio"
+              className="px-6 py-3.5 bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 text-white text-xs sm:text-sm font-bold rounded-2xl transition shadow-md shadow-brand-900/15 flex items-center space-x-2 cursor-pointer"
             >
-              <Calendar className="w-4 h-4" />
-              <span>Yönetici Takvimini İncele</span>
+              <Sparkles className="w-4 h-4 text-amber-200" />
+              <span>BAGE’ye Talep Oluştur (Müşteri)</span>
             </Link>
 
             <Link
-              href="/book/glamour-nail"
-              target="_blank"
-              className="px-6 py-3 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition flex items-center space-x-2"
+              href="/admin/calendar"
+              className="px-6 py-3.5 bg-white hover:bg-brand-50 text-brand-900 text-xs sm:text-sm font-bold rounded-2xl border border-brand-200 transition flex items-center space-x-2 shadow-xs cursor-pointer"
             >
-              <span>Müşteri Randevu Sayfasını Dene</span>
-              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+              <Calendar className="w-4 h-4 text-brand-700" />
+              <span>Salon Sahibi & Yönetici Paneli</span>
             </Link>
 
             <Link
               href="/staff"
-              className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition"
+              className="px-5 py-3.5 bg-brand-50 hover:bg-brand-100 text-brand-800 text-xs font-bold rounded-2xl border border-brand-200/60 transition cursor-pointer"
             >
-              <span>Personel Görünümü (Kasa Gizli)</span>
+              <span>Personel Girişi (Kasa Gizli)</span>
             </Link>
           </div>
         </div>
 
-        {/* 4 Core Features Bento */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Calendar className="w-5 h-5" />
+        {/* Feature Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 text-left pt-6">
+          <div className="bg-white p-5 rounded-3xl border border-brand-100 shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center border border-brand-200">
+              <Sparkles className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Akıllı Randevu Takvimi</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Tüm çalışanlarınızın saatlik çalışma planını yan yana görün, boş saatlere tek tıkla randevu oluşturun.
+            <h3 className="font-bold text-brand-950 font-serif text-base">İlk Müsait Uzman</h3>
+            <p className="text-xs text-brand-700/80 leading-relaxed">
+              Müşterilerin uzman seçimi yapmadan, en hızlı boşluğa randevu oluşturmasını sağlayan butik deneyim.
             </p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <div className="bg-white p-5 rounded-3xl border border-brand-100 shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center border border-brand-200">
               <Wallet className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Kasa & Gelir-Gider</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Nakit, POS kart çekimleri ve havale dengesini anlık takip edin. Harcamalarınızı tek tıkla kaydedin.
+            <h3 className="font-bold text-brand-950 font-serif text-base">Kasa & Kapora Kontrolü</h3>
+            <p className="text-xs text-brand-700/80 leading-relaxed">
+              Hizmeti tamamlarken ödeme yöntemi seçimi, kapora takibi ve günlük/aylık ayrışımlı net finans defteri.
             </p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+          <div className="bg-white p-5 rounded-3xl border border-brand-100 shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center border border-brand-200">
               <Users className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Özel Personel ID & Gizlilik</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Çalışanlar sisteme kendi ID leriyle girer. Yalnızca kendi randevularını görür, kasanızı asla göremezler.
+            <h3 className="font-bold text-brand-950 font-serif text-base">İzin, Rapor & Maaş</h3>
+            <p className="text-xs text-brand-700/80 leading-relaxed">
+              Ücretsiz izin ve hastalık raporlarına göre otomatik yevmiye kesintisi, prim hak edişi ve Excel ihracı.
             </p>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <MessageSquare className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-slate-900 text-base">Sıfır Masraflı WhatsApp</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              SMS paketi satın almadan, dükkanınızın WhatsApp numarasından müşterilere otomatik teyit mesajları gönderin.
-            </p>
-          </div>
-        </div>
-
-        {/* Pricing & Value Section */}
-        <div className="bg-white rounded-2xl border border-blue-200 p-8 shadow-xs max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2">
-            <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">UCE Bilişim Güvencesiyle</span>
-            <h2 className="text-2xl font-extrabold text-slate-900">İşletmenizi Kolayca Dijitalleştirin</h2>
-            <p className="text-xs text-slate-600 leading-relaxed max-w-xl">
-              Yüksek komisyonlar ve karmaşık sözleşmeler olmadan; randevu takvimi, kasa takibi ve WhatsApp otomasyonuyla işletmenizin verimliliğini anında artırın.
-            </p>
-          </div>
-
-          <div className="shrink-0 text-center bg-blue-50 border border-blue-100 p-5 rounded-xl">
-            <span className="text-xs text-slate-500">Aylık Abonelik</span>
-            <div className="text-3xl font-extrabold text-blue-700">399 ₺ <span className="text-xs font-normal text-slate-500">/ ay</span></div>
-            <Link
-              href="/admin/calendar"
-              className="mt-3 block px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg transition"
-            >
-              Hemen Başla
-            </Link>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© 2026 UCE Bilişim • Randevu ve Yönetim Platformu</span>
-          <span>Tüm Hakları Saklıdır</span>
+      <footer className="bg-white border-t border-brand-100 py-6 text-center text-xs text-brand-700">
+        <div className="flex items-center justify-center space-x-3 mb-2">
+          <a
+            href="https://www.instagram.com/bage.nailstudio/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center space-x-1.5 text-brand-800 hover:text-brand-950 font-semibold transition"
+          >
+            <Instagram className="w-3.5 h-3.5 text-brand-700" />
+            <span>@bage.nailstudio</span>
+          </a>
+          <span>•</span>
+          <a href="tel:+902125551234" className="hover:text-brand-950 font-medium">
+            +90 212 555 12 34
+          </a>
         </div>
+        <p className="font-semibold text-brand-900">
+          BAGE Nail Studio | Beaute • Bagenailstudiobeaute.com
+        </p>
+        <p className="text-[11px] text-slate-400 mt-1">
+          UCE Bilişim • Randevu ve İşletme Yönetim Platformu
+        </p>
       </footer>
     </div>
   );

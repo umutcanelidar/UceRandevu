@@ -29,6 +29,13 @@ export interface User {
   staffId?: string;
 }
 
+export interface StaffLeaveRecord {
+  id: string;
+  date: string; // "YYYY-MM-DD"
+  type: 'PAID' | 'UNPAID' | 'SICK'; // Ücretli, Ücretsiz, Hastalık/Rapor
+  notes?: string;
+}
+
 export interface Staff {
   id: string;
   tenantId: string;
@@ -38,6 +45,8 @@ export interface Staff {
   phone: string;
   avatarColor: string;
   isActive: boolean;
+  canPerformServices?: boolean; // Personel işlem yapma yetkisi (aç/kapa)
+  baseSalary?: number; // Sabit aylık maaş (TL)
   commissionRate: number; // Prim oranı (%)
   workingHours: {
     start: string; // "09:00"
@@ -46,6 +55,7 @@ export interface Staff {
   };
   offDays: number[]; // Haftalık izin günleri [7] (Pazar) veya [1] (Pazartesi)
   leaveDates: string[]; // Özel izin tarihleri: ["2026-09-22", "2026-09-23"]
+  leaveRecords?: StaffLeaveRecord[]; // Detaylı izin kayıtları
 }
 
 export interface Service {
@@ -176,6 +186,7 @@ export interface Appointment {
   paymentMethod?: 'CASH' | 'CREDIT_CARD' | 'HAVALE' | 'PACKAGE' | 'UNPAID';
   depositAmount: number;
   depositPaid: boolean;
+  depositPaymentMethod?: 'CASH' | 'CREDIT_CARD' | 'HAVALE';
   usedPackageId?: string; // Seans hakkından düşüldüyse paket ID
   specialistChangedFrom?: string; // Eski personelin adı/kodu
   whatsappReminderSent: boolean;

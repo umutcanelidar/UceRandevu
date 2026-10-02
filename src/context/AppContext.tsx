@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import {
   Tenant,
   Staff,
+  StaffLeaveRecord,
   Service,
   Customer,
   PackageDefinition,
@@ -73,12 +74,17 @@ interface AppContextType {
     paymentMethod?: Appointment['paymentMethod']
   ) => void;
   reassignAppointmentSpecialist: (appointmentId: string, newStaffId: string) => void;
+  deleteAppointment: (id: string) => void;
   
   // CRM
   addCustomer: (cust: Omit<Customer, 'id' | 'createdAt'>) => Customer;
   updateCustomer: (id: string, cust: Partial<Customer>) => void;
+  deleteCustomer: (id: string) => void;
   
   // Packages
+  addPackageDefinition: (pkg: Omit<PackageDefinition, 'id' | 'tenantId'>) => void;
+  updatePackageDefinition: (id: string, pkg: Partial<PackageDefinition>) => void;
+  deletePackageDefinition: (id: string) => void;
   buyCustomerPackage: (
     customerId: string,
     packageId: string,
@@ -87,11 +93,17 @@ interface AppContextType {
   usePackageSession: (customerPackageId: string) => void;
 
   // Retail POS
+  addRetailProduct: (prod: Omit<RetailProduct, 'id' | 'tenantId'>) => void;
+  updateRetailProduct: (id: string, prod: Partial<RetailProduct>) => void;
+  deleteRetailProduct: (id: string) => void;
   recordProductSale: (
     sale: Omit<ProductSale, 'id' | 'createdAt' | 'tenantId' | 'staffName'>
   ) => void;
 
   // Inventory
+  addInventoryItem: (item: Omit<InventoryItem, 'id' | 'tenantId'>) => void;
+  updateInventoryItem: (id: string, item: Partial<InventoryItem>) => void;
+  deleteInventoryItem: (id: string) => void;
   updateInventoryStock: (itemId: string, newQuantity: number) => void;
 
   // Waitlist
@@ -100,17 +112,23 @@ interface AppContextType {
 
   // Finance & Transactions
   addTransaction: (txn: Omit<Transaction, 'id' | 'createdAt' | 'tenantId'>) => void;
+  deleteTransaction: (id: string) => void;
   
-  // Staff & Leave
+  // Staff & Leave & Salaries
   addStaff: (staff: Omit<Staff, 'id'>) => void;
   updateStaff: (id: string, staff: Partial<Staff>) => void;
+  deleteStaff: (id: string) => void;
+  toggleStaffServicePermission: (id: string) => void;
   toggleStaffOffDay: (staffId: string, dayNumber: number) => void;
   addStaffLeaveDate: (staffId: string, dateStr: string) => void;
   removeStaffLeaveDate: (staffId: string, dateStr: string) => void;
+  addStaffLeaveRecord: (staffId: string, leave: Omit<StaffLeaveRecord, 'id'>) => void;
+  deleteStaffLeaveRecord: (staffId: string, recordId: string) => void;
 
   // Services
   addService: (srv: Omit<Service, 'id'>) => void;
   updateService: (id: string, srv: Partial<Service>) => void;
+  deleteService: (id: string) => void;
 
   // Communication
   sendWhatsAppMessage: (phone: string, message: string) => void;
@@ -119,7 +137,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [tenant, setTenant] = useState<Tenant>(initialTenant);
+  const [tenant] = useState<Tenant>(initialTenant);
   const [staffList, setStaffList] = useState<Staff[]>(initialStaff);
   const [services, setServices] = useState<Service[]>(initialServices);
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
@@ -164,7 +182,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const getMaskedName = (fullName: string) => maskCustomerName(fullName, currentUser.role);
   const getMaskedPhone = (phone: string) => maskCustomerPhone(phone, currentUser.role);
 
-  // Randevu oluşturma & dinamik süre hesaplama
+  // Kasa İşlemi Ekle
+  const addTransaction = (txn: Omit<Transaction, 'id' | 'createdAt' | 'tenantId'>) => {
+    const newTxn: Transaction = {
+      ...txn,
+      id: `txn-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      tenantId: tenant.id,
+      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+    };
+    setTransactions((prev) => [newTxn, ...prev]);
+  };
+
+  const deleteTransaction = (id: string) => {
+    setTransactions((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Randevu oluşturma & dinamik süre hesaplama & Kapora tahsilatı
   const addAppointment = (aptData: Omit<Appointment, 'id' | 'createdAt' | 'whatsappReminderSent'>) => {
     const newApt: Appointment = {
       ...aptData,
@@ -175,17 +208,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setAppointments((prev) => [newApt, ...prev]);
 
+    // Kapora alındıysa kasaya ciro/gelir olarak otomatik kaydet
+    if (aptData.depositPaid && aptData.depositAmount > 0) {
+      const payMethod = aptData.depositPaymentMethod === 'CASH'
+        ? 'CASH'
+        : aptData.depositPaymentMethod === 'HAVALE'
+        ? 'HAVALE'
+        : 'CREDIT_CARD';
+
+      addTransaction({
+        type: 'INCOME',
+        category: 'Kapora Geliri',
+        amount: aptData.depositAmount,
+        paymentMethod: payMethod,
+        description: `${aptData.customerName} - Randevu Kaporası (${aptData.date} ${aptData.startTime})`,
+        staffId: aptData.staffId,
+        appointmentId: newApt.id,
+        date: aptData.date,
+      });
+    }
+
     // WhatsApp Otomasyon Bildirimi
     const staffObj = staffList.find((s) => s.id === aptData.staffId);
     const srvObj = services.find((s) => s.id === aptData.serviceId);
-    const autoMsg = `Sayın ${aptData.customerName}, BAGE Stüdyo'da ${aptData.date} saat ${aptData.startTime} için ${staffObj?.name || 'uzmanımız'} ile ${srvObj?.name || 'işlem'} randevunuz oluşturuldu. Detaylar ve iptal için bize yazabilirsiniz.`;
+    const autoMsg = `Sayın ${aptData.customerName}, BAGE Nail Studio | Beaute'de ${aptData.date} saat ${aptData.startTime} için ${staffObj?.name || 'uzmanımız'} ile ${srvObj?.name || 'işlem'} randevunuz oluşturuldu. Detaylar ve değişiklik için bize yazabilirsiniz.`;
 
     sendWhatsAppMessage(aptData.customerPhone, autoMsg);
 
     return newApt;
   };
 
-  // Randevu durum güncelleme & paket seans düşme
+  // Randevu durum güncelleme & ödeme alma & paket seans düşme
   const updateAppointmentStatus = (
     id: string,
     status: Appointment['status'],
@@ -207,16 +260,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
           // Eğer işlem tamamlandıysa ve ödeme alındıysa kasaya ciro olarak ekle
           if (status === 'COMPLETED' && paymentMethod && paymentMethod !== 'PACKAGE' && paymentMethod !== 'UNPAID') {
-            addTransaction({
-              type: 'INCOME',
-              category: 'Randevu Geliri',
-              amount: apt.price,
-              paymentMethod: paymentMethod === 'CASH' ? 'CASH' : paymentMethod === 'HAVALE' ? 'HAVALE' : 'CREDIT_CARD',
-              description: `${apt.customerName} - Randevu İşlem Geliri`,
-              staffId: apt.staffId,
-              appointmentId: apt.id,
-              date: apt.date,
-            });
+            const finalCashAmount = apt.depositPaid ? Math.max(0, apt.price - apt.depositAmount) : apt.price;
+            
+            if (finalCashAmount > 0) {
+              addTransaction({
+                type: 'INCOME',
+                category: 'Randevu Geliri',
+                amount: finalCashAmount,
+                paymentMethod: paymentMethod === 'CASH' ? 'CASH' : paymentMethod === 'HAVALE' ? 'HAVALE' : 'CREDIT_CARD',
+                description: `${apt.customerName} - Randevu Kalan Ödeme Tutarı`,
+                staffId: apt.staffId,
+                appointmentId: apt.id,
+                date: apt.date,
+              });
+            }
+
+            // Müşteri CRM ziyaret ve harcama istatistiklerini güncelle
+            setCustomers((prevCusts) =>
+              prevCusts.map((c) => {
+                if (c.id === apt.customerId || (apt.customerPhone && c.phone === apt.customerPhone)) {
+                  return {
+                    ...c,
+                    totalVisits: (c.totalVisits || 0) + 1,
+                    totalSpent: (c.totalSpent || 0) + apt.price,
+                    lastVisitDate: apt.date,
+                  };
+                }
+                return c;
+              })
+            );
           }
 
           return updated;
@@ -224,6 +296,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return apt;
       })
     );
+  };
+
+  const deleteAppointment = (id: string) => {
+    setAppointments((prev) => prev.filter((a) => a.id !== id));
   };
 
   // Uzman (Personel) Değişikliği
@@ -243,7 +319,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  // Müşteri Ekle / Güncelle
+  // Müşteri Ekle / Güncelle / Sil
   const addCustomer = (custData: Omit<Customer, 'id' | 'createdAt'>): Customer => {
     const newCust: Customer = {
       ...custData,
@@ -258,6 +334,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCustomers((prev) => prev.map((c) => (c.id === id ? { ...c, ...data } : c)));
   };
 
+  const deleteCustomer = (id: string) => {
+    setCustomers((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  // Paket Tanımları (CRUD)
+  const addPackageDefinition = (pkg: Omit<PackageDefinition, 'id' | 'tenantId'>) => {
+    const newPkg: PackageDefinition = {
+      ...pkg,
+      id: `pkg-${Date.now()}`,
+      tenantId: tenant.id,
+    };
+    setPackages((prev) => [...prev, newPkg]);
+  };
+
+  const updatePackageDefinition = (id: string, pkg: Partial<PackageDefinition>) => {
+    setPackages((prev) => prev.map((p) => (p.id === id ? { ...p, ...pkg } : p)));
+  };
+
+  const deletePackageDefinition = (id: string) => {
+    setPackages((prev) => prev.filter((p) => p.id !== id));
+  };
+
   // Paket Satışı
   const buyCustomerPackage = (
     customerId: string,
@@ -269,7 +367,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!cust || !pkg) return;
 
     const todayStr = new Date().toISOString().split('T')[0];
-    const expiryDateStr = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 6 ay geçerli
+    const expiryDateStr = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     const newCustPkg: CustomerPackage = {
       id: `cpkg-${Date.now()}`,
@@ -316,6 +414,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  // Perakende Satış Ürünleri (CRUD)
+  const addRetailProduct = (prod: Omit<RetailProduct, 'id' | 'tenantId'>) => {
+    const newProd: RetailProduct = {
+      ...prod,
+      id: `prod-${Date.now()}`,
+      tenantId: tenant.id,
+    };
+    setRetailProducts((prev) => [...prev, newProd]);
+  };
+
+  const updateRetailProduct = (id: string, prod: Partial<RetailProduct>) => {
+    setRetailProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...prod } : p)));
+  };
+
+  const deleteRetailProduct = (id: string) => {
+    setRetailProducts((prev) => prev.filter((p) => p.id !== id));
+  };
+
   // Perakende Ürün Satışı (Mini POS)
   const recordProductSale = (
     saleData: Omit<ProductSale, 'id' | 'createdAt' | 'tenantId' | 'staffName'>
@@ -357,7 +473,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  // Sarf Malzeme Stok Güncelleme
+  // Sarf Malzemeleri (CRUD)
+  const addInventoryItem = (item: Omit<InventoryItem, 'id' | 'tenantId'>) => {
+    const newItem: InventoryItem = {
+      ...item,
+      id: `inv-${Date.now()}`,
+      tenantId: tenant.id,
+      lastRestockedAt: new Date().toISOString().split('T')[0],
+    };
+    setInventoryItems((prev) => [...prev, newItem]);
+  };
+
+  const updateInventoryItem = (id: string, item: Partial<InventoryItem>) => {
+    setInventoryItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...item } : i)));
+  };
+
+  const deleteInventoryItem = (id: string) => {
+    setInventoryItems((prev) => prev.filter((i) => i.id !== id));
+  };
+
   const updateInventoryStock = (itemId: string, newQuantity: number) => {
     setInventoryItems((prev) =>
       prev.map((item) =>
@@ -387,30 +521,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setWaitlist((prev) => prev.map((w) => (w.id === id ? { ...w, status } : w)));
   };
 
-  // Kasa İşlemleri
-  const addTransaction = (txn: Omit<Transaction, 'id' | 'createdAt' | 'tenantId'>) => {
-    const newTxn: Transaction = {
-      ...txn,
-      id: `txn-${Date.now()}`,
-      tenantId: tenant.id,
-      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    };
-    setTransactions((prev) => [newTxn, ...prev]);
-  };
-
-  // Personel & İzin Yönetimi
+  // Personel & İzin & Maaş Yönetimi
   const addStaff = (staff: Omit<Staff, 'id'>) => {
     const newStaff: Staff = {
       ...staff,
       id: `staff-${Date.now()}`,
+      canPerformServices: staff.canPerformServices ?? true,
+      baseSalary: staff.baseSalary ?? 30000,
       offDays: staff.offDays || [7],
       leaveDates: staff.leaveDates || [],
+      leaveRecords: staff.leaveRecords || [],
     };
     setStaffList((prev) => [...prev, newStaff]);
   };
 
   const updateStaff = (id: string, updatedStaff: Partial<Staff>) => {
     setStaffList((prev) => prev.map((s) => (s.id === id ? { ...s, ...updatedStaff } : s)));
+  };
+
+  const deleteStaff = (id: string) => {
+    setStaffList((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const toggleStaffServicePermission = (id: string) => {
+    setStaffList((prev) =>
+      prev.map((s) =>
+        s.id === id ? { ...s, canPerformServices: s.canPerformServices === false ? true : false } : s
+      )
+    );
   };
 
   const toggleStaffOffDay = (staffId: string, dayNumber: number) => {
@@ -450,7 +588,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  // Hizmet Kataloğu
+  const addStaffLeaveRecord = (staffId: string, leave: Omit<StaffLeaveRecord, 'id'>) => {
+    setStaffList((prev) =>
+      prev.map((s) => {
+        if (s.id === staffId) {
+          const newRecord: StaffLeaveRecord = {
+            ...leave,
+            id: `leave-${Date.now()}`,
+          };
+          const existingDates = s.leaveDates || [];
+          const updatedDates = existingDates.includes(leave.date) ? existingDates : [...existingDates, leave.date];
+          return {
+            ...s,
+            leaveRecords: [...(s.leaveRecords || []), newRecord],
+            leaveDates: updatedDates,
+          };
+        }
+        return s;
+      })
+    );
+  };
+
+  const deleteStaffLeaveRecord = (staffId: string, recordId: string) => {
+    setStaffList((prev) =>
+      prev.map((s) => {
+        if (s.id === staffId) {
+          const updatedRecords = (s.leaveRecords || []).filter((r) => r.id !== recordId);
+          const updatedDates = updatedRecords.map((r) => r.date);
+          return {
+            ...s,
+            leaveRecords: updatedRecords,
+            leaveDates: updatedDates,
+          };
+        }
+        return s;
+      })
+    );
+  };
+
+  // Hizmet Kataloğu (CRUD)
   const addService = (srv: Omit<Service, 'id'>) => {
     const newSrv: Service = { ...srv, id: `srv-${Date.now()}` };
     setServices((prev) => [...prev, newSrv]);
@@ -458,6 +634,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateService = (id: string, srv: Partial<Service>) => {
     setServices((prev) => prev.map((s) => (s.id === id ? { ...s, ...srv } : s)));
+  };
+
+  const deleteService = (id: string) => {
+    setServices((prev) => prev.filter((s) => s.id !== id));
   };
 
   // WhatsApp Mesaj Gönderimi
@@ -499,22 +679,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addAppointment,
         updateAppointmentStatus,
         reassignAppointmentSpecialist,
+        deleteAppointment,
         addCustomer,
         updateCustomer,
+        deleteCustomer,
+        addPackageDefinition,
+        updatePackageDefinition,
+        deletePackageDefinition,
         buyCustomerPackage,
         usePackageSession,
+        addRetailProduct,
+        updateRetailProduct,
+        deleteRetailProduct,
         recordProductSale,
+        addInventoryItem,
+        updateInventoryItem,
+        deleteInventoryItem,
         updateInventoryStock,
         addToWaitlist,
         updateWaitlistStatus,
         addTransaction,
+        deleteTransaction,
         addStaff,
         updateStaff,
+        deleteStaff,
+        toggleStaffServicePermission,
         toggleStaffOffDay,
         addStaffLeaveDate,
         removeStaffLeaveDate,
+        addStaffLeaveRecord,
+        deleteStaffLeaveRecord,
         addService,
         updateService,
+        deleteService,
         sendWhatsAppMessage,
       }}
     >
