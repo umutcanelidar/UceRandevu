@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
+import { db } from '@/lib/supabaseSync';
 import {
   ShieldCheck,
   User,
@@ -54,7 +55,7 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleAdminLogin = (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
 
@@ -75,30 +76,60 @@ export default function LoginPage() {
     const storeKey = `uce_admin_pass_${storeSlug}`;
     const savedPass = typeof window !== 'undefined' ? localStorage.getItem(storeKey) : null;
 
-    if (!savedPass) {
-      // Bu mağaza için henüz şifre belirlenmemiş (İlk Kez Giriş)
-      if (passTrim.length < 4) {
-        setErrorMsg('Yönetici şifreniz en az 4 karakter olmalıdır.');
+    setIsLoading(true);
+
+    try {
+      // 1. Supabase Cloud Authentication
+      const verification = await db.verifyTenantLogin(storeSlug, passTrim);
+      
+      if (!verification.success && !verification.isFirstSetup) {
+        setErrorMsg('Hatalı yönetici şifresi! Lütfen bu mağaza için belirlediğiniz şifreyi giriniz.');
+        setIsLoading(false);
         return;
       }
+
+      if (verification.isFirstSetup) {
+        if (!savedPass) {
+          if (passTrim.length < 4) {
+            setErrorMsg('Yönetici şifreniz en az 4 karakter olmalıdır.');
+            setIsLoading(false);
+            return;
+          }
+          await db.upsertTenant({
+            ...tenant,
+            id: `tenant-${storeSlug}`,
+            slug: storeSlug,
+            name: storeName ? storeName.charAt(0).toUpperCase() + storeName.slice(1) : tenant.name,
+          }, passTrim);
+        } else if (savedPass !== passTrim) {
+          setErrorMsg('Hatalı yönetici şifresi! Lütfen bu mağaza için belirlediğiniz şifreyi giriniz.');
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // 2. LocalStorage Persistence
       if (typeof window !== 'undefined') {
         localStorage.setItem(storeKey, passTrim);
         localStorage.setItem(`uce_admin_email_${storeSlug}`, emailTrim);
+        localStorage.setItem('uce_tenant_slug', storeSlug);
       }
-    } else {
-      // Şifre kontrolü
-      if (passTrim !== savedPass) {
-        setErrorMsg('Hatalı yönetici şifresi! Lütfen bu mağaza için belirlediğiniz şifreyi giriniz.');
-        return;
-      }
-    }
 
-    setIsLoading(true);
-
-    setTimeout(() => {
       switchUser('SPECIAL_ADMIN');
       router.push('/admin/calendar');
-    }, 400);
+    } catch (err) {
+      console.warn('Giriş doğrulama uyarısı:', err);
+      // Offline fallback
+      if (savedPass && savedPass !== passTrim) {
+        setErrorMsg('Hatalı yönetici şifresi!');
+        setIsLoading(false);
+        return;
+      }
+      switchUser('SPECIAL_ADMIN');
+      router.push('/admin/calendar');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleStaffLogin = (e: React.FormEvent) => {

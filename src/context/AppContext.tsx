@@ -35,6 +35,7 @@ import {
   templateBeautyServices,
 } from '@/lib/store';
 import { maskCustomerName, maskCustomerPhone } from '@/lib/masking';
+import { db } from '@/lib/supabaseSync';
 
 interface CurrentUser {
   id: string;
@@ -208,6 +209,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Cloud Supabase Veri Çekme & Realtime Canlı Takvim Dinleyici
+  useEffect(() => {
+    if (!isHydrated || !tenant.id) return;
+
+    // Buluttan randevuları getir
+    db.getAppointments(tenant.id).then((apts) => {
+      if (apts && apts.length > 0) {
+        setAppointments(apts);
+      }
+    });
+
+    // Buluttan hizmetleri getir
+    db.getServices(tenant.id).then((srvs) => {
+      if (srvs && srvs.length > 0) {
+        setServices(srvs);
+      }
+    });
+
+    // Buluttan personelleri getir
+    db.getStaff(tenant.id).then((st) => {
+      if (st && st.length > 0) {
+        setStaffList(st);
+      }
+    });
+
+    // Buluttan müşterileri getir
+    db.getCustomers(tenant.id).then((custs) => {
+      if (custs && custs.length > 0) {
+        setCustomers(custs);
+      }
+    });
+
+    // Realtime aboneliği (farklı cihazdan randevu gelince anında ekrana düşer)
+    const unsubscribe = db.subscribeToAppointments(tenant.id, () => {
+      db.getAppointments(tenant.id).then((apts) => {
+        if (apts) setAppointments(apts);
+      });
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isHydrated, tenant.id]);
+
   // Save to LocalStorage whenever state changes
   useEffect(() => {
     if (!isHydrated || typeof window === 'undefined') return;
@@ -289,11 +334,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateTenant = (tenantData: Partial<Tenant>) => {
-    setTenant((prev) => ({ ...prev, ...tenantData }));
+    setTenant((prev) => {
+      const updated = { ...prev, ...tenantData };
+      db.upsertTenant(updated);
+      return updated;
+    });
   };
 
   const loadTemplateServices = () => {
     setServices(templateBeautyServices);
+    if (tenant.id) {
+      db.saveServices(tenant.id, templateBeautyServices);
+    }
   };
 
   const resetAllData = () => {
@@ -362,6 +414,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     setAppointments((prev) => [newApt, ...prev]);
+    db.insertAppointment(newApt);
 
     // Kapora alındıysa kasaya ciro/gelir olarak otomatik kaydet
     if (aptData.depositPaid && aptData.depositAmount > 0) {
@@ -451,10 +504,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return apt;
       })
     );
+
+    db.updateAppointmentStatus(id, status, paymentMethod);
   };
 
   const deleteAppointment = (id: string) => {
     setAppointments((prev) => prev.filter((a) => a.id !== id));
+    db.deleteAppointment(id);
   };
 
   // Uzman (Personel) Değişikliği
@@ -482,6 +538,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date().toISOString().split('T')[0],
     };
     setCustomers((prev) => [newCust, ...prev]);
+    db.insertCustomer(newCust);
     return newCust;
   };
 

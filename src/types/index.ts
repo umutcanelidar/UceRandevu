@@ -6,6 +6,7 @@ export interface Tenant {
   slug: string;
   phone: string;
   address: string;
+  city?: string;
   currency: string;
   logoUrl?: string;
   plan: 'STARTER' | 'PRO' | 'ENTERPRISE';
