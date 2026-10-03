@@ -124,9 +124,9 @@ export default function HomePage() {
             <div className="w-11 h-11 rounded-2xl bg-[#FCFBF9] text-[#8C6D3F] flex items-center justify-center border border-[#E5D5B5]">
               <Calendar className="w-5 h-5 text-[#B8860B]" />
             </div>
-            <h3 className="font-bold text-slate-900 font-serif text-base">Çakışmasız Canlı Takvim</h3>
+            <h3 className="font-bold text-slate-900 font-serif text-base">7/24 Kesintisiz Canlı Takvim</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              10:00 - 21:00 arası 15 dakikalık aralıklarla randevu planlaması. Müşteriler için online talep, yöneticiler için hızlı düzenleme.
+              Saat sınırlaması olmadan 7/24 kesintisiz randevu planlaması. Müşteriler için online talep, yöneticiler için hızlı düzenleme.
             </p>
           </div>
 

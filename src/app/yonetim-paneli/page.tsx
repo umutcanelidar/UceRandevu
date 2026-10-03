@@ -225,10 +225,10 @@ export default function UceBilisimManagementGateway() {
                 <div className="p-3.5 rounded-2xl bg-[#1c1c1c] border border-[#c5a059]/20 space-y-1">
                   <div className="flex items-center space-x-2 text-[#e5d5b5] font-bold">
                     <Calendar className="w-4 h-4 text-[#c5a059]" />
-                    <span className="font-serif">Canlı Randevu & Takvim</span>
+                    <span className="font-serif">7/24 Kesintisiz Randevu & Takvim</span>
                   </div>
                   <p className="text-[11px] text-stone-400 leading-relaxed font-light">
-                    10:00 - 21:00 arası 15 dakikalık aralıklarla çakışmasız randevu planlaması.
+                    Saat sınırlaması olmadan müşterileriniz için 7/24 kesintisiz online randevu planlaması.
                   </p>
                 </div>
 

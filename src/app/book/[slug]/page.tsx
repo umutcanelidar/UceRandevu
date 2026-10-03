@@ -38,30 +38,29 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
     ? services
     : services.filter((s) => s.category === selectedCategory);
 
-  // 10:00 - 21:00 arası 15 dakikalık randevu aralıkları (Müşteri talebi)
+  // 7/24 Kesintisiz 15 dakika aralıklı randevu saatleri (00:00 - 23:45)
   const generate15MinIntervals = () => {
     const slots: string[] = [];
-    for (let hour = 10; hour <= 20; hour++) {
+    for (let hour = 0; hour < 24; hour++) {
       for (let min = 0; min < 60; min += 15) {
         const hStr = hour.toString().padStart(2, '0');
         const mStr = min.toString().padStart(2, '0');
         slots.push(`${hStr}:${mStr}`);
       }
     }
-    slots.push('21:00');
     return slots;
   };
 
   const availableHours = generate15MinIntervals();
 
-  // "BAGE'ye Talep Oluştur" gönderildiğinde
+  // Randevu Talebi gönderildiğinde
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName || !customerPhone || !selectedService) return;
 
     // Otomatik "İlk Müsait Uzman" ataması (İşlem yetkisi aktif olanlar arasından)
     const eligibleStaff = staffList.filter((s) => s.isActive && (s.canPerformServices !== false));
-    const assignedStaffId = eligibleStaff[0]?.id || staffList[0]?.id || 'staff-1';
+    const assignedStaffId = eligibleStaff[0]?.id || staffList[0]?.id || 'staff-unassigned';
 
     const duration = selectedService?.durationMinutes || 60;
     const [h, m] = selectedTime.split(':').map(Number);

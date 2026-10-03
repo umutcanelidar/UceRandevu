@@ -79,22 +79,19 @@ export default function AdminCalendarPage() {
   const [depositAmount, setDepositAmount] = useState<number>(200);
   const [depositPaymentMethod, setDepositPaymentMethod] = useState<'CASH' | 'CREDIT_CARD' | 'HAVALE'>('CREDIT_CARD');
 
-  // 10:00 dan başlayan ve 21:00'e kadar süren takvim saat dilimleri
-  const hours = [
-    '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'
-  ];
+  // 7/24 Kesintisiz Takvim Saat Dilimleri (00:00 - 23:00)
+  const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
 
-  // Randevu oluşturma ekranı için 15 dakika aralıklı saat listesi (10:00 - 20:45)
+  // Randevu oluşturma ekranı için 7/24 15 dakika aralıklı saat listesi (00:00 - 23:45)
   const generate15MinIntervals = () => {
     const slots: string[] = [];
-    for (let hour = 10; hour <= 20; hour++) {
+    for (let hour = 0; hour < 24; hour++) {
       for (let min = 0; min < 60; min += 15) {
         const hStr = hour.toString().padStart(2, '0');
         const mStr = min.toString().padStart(2, '0');
         slots.push(`${hStr}:${mStr}`);
       }
     }
-    slots.push('21:00');
     return slots;
   };
   const interval15MinList = generate15MinIntervals();

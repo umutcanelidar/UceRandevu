@@ -22,6 +22,7 @@ export default function LoginPage() {
 
   const [activeTab, setActiveTab] = useState<'ADMIN' | 'STAFF'>('ADMIN');
   const [storeName, setStoreName] = useState('');
+  const [isFirstSetup, setIsFirstSetup] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -31,13 +32,20 @@ export default function LoginPage() {
       const active = storeParam || savedSlug;
       if (active) {
         setStoreName(active.toUpperCase());
+        const storeKey = `uce_admin_pass_${active.toLowerCase()}`;
+        const existing = localStorage.getItem(storeKey);
+        setIsFirstSetup(!existing);
+      } else {
+        const defaultKey = 'uce_admin_pass_default';
+        const existing = localStorage.getItem(defaultKey);
+        setIsFirstSetup(!existing);
       }
     }
   }, []);
 
-  // Admin form
-  const [adminEmail, setAdminEmail] = useState('yonetici@isletme.com');
-  const [adminPassword, setAdminPassword] = useState('123456');
+  // Admin form (Hazır/hardcoded veriler kaldırıldı)
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
 
   // Staff form
   const [selectedStaffCode, setSelectedStaffCode] = useState(staffList[0]?.staffCode || '');
@@ -48,8 +56,44 @@ export default function LoginPage() {
 
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setErrorMsg('');
+
+    const emailTrim = adminEmail.trim();
+    const passTrim = adminPassword.trim();
+
+    if (!emailTrim) {
+      setErrorMsg('Lütfen e-posta adresinizi veya kullanıcı adınızı giriniz.');
+      return;
+    }
+
+    if (!passTrim) {
+      setErrorMsg('Lütfen yönetici şifrenizi giriniz.');
+      return;
+    }
+
+    const storeSlug = (storeName || tenant.slug || 'default').toLowerCase();
+    const storeKey = `uce_admin_pass_${storeSlug}`;
+    const savedPass = typeof window !== 'undefined' ? localStorage.getItem(storeKey) : null;
+
+    if (!savedPass) {
+      // Bu mağaza için henüz şifre belirlenmemiş (İlk Kez Giriş)
+      if (passTrim.length < 4) {
+        setErrorMsg('Yönetici şifreniz en az 4 karakter olmalıdır.');
+        return;
+      }
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(storeKey, passTrim);
+        localStorage.setItem(`uce_admin_email_${storeSlug}`, emailTrim);
+      }
+    } else {
+      // Şifre kontrolü
+      if (passTrim !== savedPass) {
+        setErrorMsg('Hatalı yönetici şifresi! Lütfen bu mağaza için belirlediğiniz şifreyi giriniz.');
+        return;
+      }
+    }
+
+    setIsLoading(true);
 
     setTimeout(() => {
       switchUser('SPECIAL_ADMIN');
@@ -180,26 +224,40 @@ export default function LoginPage() {
                 <input
                   type="text"
                   required
+                  placeholder="yonetici@isletmeniz.com veya 05xxxxxxxxx"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 font-medium text-brand-950 shadow-2xs bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 font-medium text-brand-950 shadow-2xs bg-white text-xs"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-brand-950 mb-1">
-                  Yönetici Şifresi
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-semibold text-brand-950">
+                    Yönetici Şifresi
+                  </label>
+                  {isFirstSetup && (
+                    <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                      İlk Kez Şifre Belirleniyor
+                    </span>
+                  )}
+                </div>
                 <div className="relative">
                   <input
                     type="password"
                     required
+                    placeholder={isFirstSetup ? "İlk şifrenizi belirleyiniz (En az 4 karakter)" : "Yönetici şifrenizi giriniz"}
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 font-mono text-brand-950 shadow-2xs bg-white"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 font-mono text-brand-950 shadow-2xs bg-white text-xs"
                   />
                   <Lock className="w-4 h-4 text-brand-400 absolute right-3 top-3" />
                 </div>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  {isFirstSetup
+                    ? "✨ İlk Kurulum: Gireceğiniz bu şifre, bu işletmenin yönetici şifresi olarak güvenle kaydedilecektir."
+                    : "🔒 Güvenli Giriş: Lütfen işletmeniz için belirlediğiniz şifreyi giriniz."}
+                </p>
               </div>
 
               <button
@@ -207,15 +265,9 @@ export default function LoginPage() {
                 disabled={isLoading}
                 className="w-full py-3 bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 text-white font-bold text-xs sm:text-sm rounded-2xl transition shadow-md shadow-brand-900/15 flex items-center justify-center space-x-2 cursor-pointer"
               >
-                <span>{isLoading ? 'Giriş Yapılıyor...' : 'Yönetim Paneline Giriş Yap'}</span>
+                <span>{isLoading ? 'Giriş Yapılıyor...' : isFirstSetup ? 'Şifremi Kaydet ve Giriş Yap' : 'Yönetim Paneline Giriş Yap'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-
-              <div className="text-center pt-1">
-                <span className="text-[11px] text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full border border-brand-200">
-                  💡 Hızlı Demo Girişi: <strong>Giriş Yap</strong> butonuna tıklayarak doğrudan girebilirsiniz.
-                </span>
-              </div>
             </form>
           )}
 

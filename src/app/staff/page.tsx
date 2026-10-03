@@ -345,12 +345,11 @@ export default function StaffPortalPage() {
                   >
                     {(() => {
                       const slots: string[] = [];
-                      for (let hour = 10; hour <= 20; hour++) {
+                      for (let hour = 0; hour < 24; hour++) {
                         for (let min = 0; min < 60; min += 15) {
                           slots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
                         }
                       }
-                      slots.push('21:00');
                       return slots.map((h) => (
                         <option key={h} value={h}>
                           {h}
