@@ -25,17 +25,23 @@ export function middleware(request: NextRequest) {
     subdomain = hostname.replace('.localhost', '');
   } else if (hostname.endsWith('.ucebilisim.com')) {
     subdomain = hostname.replace('.ucebilisim.com', '');
+  } else if (hostname.endsWith('.ucerandevu.com')) {
+    subdomain = hostname.replace('.ucerandevu.com', '');
   }
 
-  // Subdomain multi-tenancy routing
-  if (subdomain && subdomain !== 'www' && subdomain !== 'randevu') {
-    // If tenant is bagenailstudio (or similar variation)
-    if (subdomain === 'bagenailstudio' || subdomain === 'bage' || subdomain === 'bagestudio') {
-      // Root "/" serves the customer-facing booking page directly!
-      if (url.pathname === '/') {
-        url.pathname = '/book/bage-studio';
-        return NextResponse.rewrite(url);
-      }
+  // Subdomain multi-tenancy routing (Wildcard)
+  const reservedSubdomains = ['www', 'app', 'admin', 'api', 'panel'];
+  if (subdomain && !reservedSubdomains.includes(subdomain)) {
+    // 1. Root "/" on subdomain serves customer-facing 7/24 booking page directly!
+    if (url.pathname === '/') {
+      url.pathname = `/book/${subdomain}`;
+      return NextResponse.rewrite(url);
+    }
+
+    // 2. "/login" on subdomain automatically pre-selects the store
+    if (url.pathname === '/login') {
+      url.searchParams.set('store', subdomain);
+      return NextResponse.rewrite(url);
     }
   }
 
