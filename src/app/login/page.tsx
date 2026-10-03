@@ -55,6 +55,9 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const isBage = storeName.toLowerCase().includes('bage') || (tenant.slug || '').toLowerCase().includes('bage');
+  const storeDisplayName = isBage ? 'BAGE Nail Studio' : (storeName || tenant.name);
+
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -163,7 +166,7 @@ export default function LoginPage() {
       <div className="bg-[#800020] text-amber-100/90 text-xs py-2 px-4 font-medium tracking-wider flex items-center justify-between">
         <div className="flex items-center space-x-2 mx-auto sm:mx-0">
           <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-          <span>{storeName ? `${storeName} • Güvenli Giriş Kapısı` : `${tenant.name} • Güvenli Giriş Kapısı`}</span>
+          <span>{storeDisplayName} • Güvenli Giriş Kapısı</span>
         </div>
         <div className="hidden sm:flex items-center space-x-3 text-xs font-semibold">
           <span>UCE Bilişim Güvencesiyle</span>
@@ -177,14 +180,14 @@ export default function LoginPage() {
           <div className="text-center space-y-2">
             <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-md border border-brand-200 mx-auto bg-brand-900 p-1 flex items-center justify-center">
               <img
-                src={tenant.logoUrl || '/uce_logo.jpg'}
-                alt="İşletme Logosu"
+                src={isBage ? '/bage-logo.jpg' : (tenant.logoUrl || '/uce_logo.jpg')}
+                alt={storeDisplayName}
                 className="w-full h-full object-cover rounded-xl"
               />
             </div>
             <div>
               <h1 className="font-serif font-bold text-xl sm:text-2xl text-brand-950 tracking-tight">
-                {storeName ? `${storeName} Yönetim Portalı` : tenant.name}
+                {storeDisplayName} Yönetim Portalı
               </h1>
               <p className="text-xs text-brand-700 font-medium">
                 İşletme Yönetimi & Personel Portalı
@@ -390,7 +393,7 @@ export default function LoginPage() {
           {/* Public Booking Link at Bottom */}
           <div className="pt-3 border-t border-brand-100 text-center">
             <a
-              href={`/book/${tenant.slug}`}
+              href={isBage ? '/book/bagenailstudio' : `/book/${tenant.slug}`}
               className="inline-flex items-center space-x-1.5 text-xs text-brand-800 hover:text-brand-950 font-semibold transition"
             >
               <Calendar className="w-3.5 h-3.5 text-brand-700" />

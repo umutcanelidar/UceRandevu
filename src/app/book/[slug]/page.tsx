@@ -150,7 +150,7 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
           <div className="flex items-center space-x-3">
             <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-sm border border-brand-200 bg-brand-900 shrink-0 flex items-center justify-center p-0.5">
               <img
-                src={tenant.logoUrl || '/uce_logo.jpg'}
+                src={tenant.slug?.toLowerCase().includes('bage') ? '/bage-logo.jpg' : (tenant.logoUrl || '/uce_logo.jpg')}
                 alt={tenant.name}
                 className="w-full h-full object-cover rounded-xl"
               />
@@ -180,7 +180,7 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
               </a>
             )}
             <a
-              href={`tel:${tenant.phone || '+905000000000'}`}
+              href={`tel:${tenant.phone ? tenant.phone.replace(/[^0-9]/g, '') : '05302812243'}`}
               className="px-3 py-1.5 rounded-full bg-brand-50 hover:bg-brand-100 text-brand-800 text-xs font-semibold flex items-center space-x-1.5 transition border border-brand-200"
             >
               <Phone className="w-3.5 h-3.5 text-brand-700" />
@@ -582,12 +582,14 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
             <span>@bage.nailstudio</span>
           </a>
           <span>•</span>
-          <a href="tel:+902125551234" className="hover:text-brand-900 font-medium">
-            +90 212 555 12 34
+          <a href="tel:05302812243" className="hover:text-brand-900 font-medium">
+            0530 281 22 43
           </a>
+          <span>•</span>
+          <span className="font-medium text-brand-900">Gebze / Kocaeli</span>
         </div>
         <p className="font-medium">
-          <strong className="text-brand-900">BAGE Nail Studio | Beaute</strong> • Bagenailstudiobeaute.com
+          <strong className="text-brand-900">{tenant.name || 'BAGE Nail Studio'}</strong> • bagenailstudio.ucebilişim.com
         </p>
         <p className="text-[10px] text-slate-400 mt-0.5">
           UCE Bilişim Altyapısı ile Güvenli Randevu Sistemi

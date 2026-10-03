@@ -12,19 +12,22 @@ export const db = {
       .maybeSingle();
 
     if (error || !data) return null;
+    const isBage = data.slug.toLowerCase().includes('bage');
     return {
       id: data.id,
       name: data.name,
       slug: data.slug,
-      phone: data.phone || '',
-      address: data.address || '',
-      city: data.city || 'İstanbul',
+      phone: data.phone || (isBage ? '0530 281 22 43' : ''),
+      address: data.address || (isBage ? 'Gebze / Kocaeli' : ''),
+      city: data.city || (isBage ? 'Gebze / Kocaeli' : 'İstanbul'),
       currency: data.currency || '₺',
+      logoUrl: isBage ? '/bage-logo.jpg' : '/uce_logo.jpg',
       plan: 'PRO',
       isActive: true,
       whatsappConnected: true,
-      whatsappNumber: data.phone || '',
-      instagramConnected: false,
+      whatsappNumber: (data.phone || (isBage ? '05302812243' : '')).replace(/[^0-9]/g, ''),
+      instagramConnected: isBage,
+      instagramHandle: isBage ? '@bage.nailstudio' : '',
       monthlyTarget: 150000,
       dailyTarget: 6000,
       createdAt: data.created_at,
