@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import {
   Calendar as CalendarIcon,
@@ -16,10 +16,12 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-export default function PublicBookingPage({ params }: { params: { slug: string } }) {
-  const { tenant, services, staffList, addAppointment } = useApp();
+type Step = 1 | 2 | 3;
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+export default function PublicBookingPage({ params }: { params: { slug: string } }) {
+  const { tenant, services, staffList, addAppointment, loadStoreBySlug } = useApp();
+
+  const [step, setStep] = useState<Step>(1);
 
   // Form State
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -30,6 +32,20 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
   const [customerPhone, setCustomerPhone] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+
+  // Load store data by slug from cloud on mount
+  useEffect(() => {
+    if (params.slug) {
+      loadStoreBySlug(params.slug);
+    }
+  }, [params.slug]);
+
+  // Sync selected service if list changes
+  useEffect(() => {
+    if (!selectedServiceId && services.length > 0) {
+      setSelectedServiceId(services[0].id);
+    }
+  }, [services, selectedServiceId]);
 
   const selectedService = services.find((s) => s.id === selectedServiceId) || services[0];
 
@@ -98,29 +114,33 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
 
   return (
     <div className="min-h-screen bg-[#FAF7F5] text-slate-800 flex flex-col justify-between selection:bg-brand-100 selection:text-brand-900">
-      {/* ALA Beauté Club Estetiğinde Üst Bilgi Barı */}
+      {/* Mağaza Üst Bilgi Barı */}
       <div className="bg-[#800020] text-amber-100/90 text-[11px] py-1.5 px-4 font-medium tracking-wider flex items-center justify-between">
         <div className="flex items-center space-x-3 mx-auto sm:mx-0">
           <span className="flex items-center space-x-1">
             <Sparkles className="w-3 h-3 text-amber-300" />
-            <span>Nişantaşı / İstanbul</span>
+            <span>{tenant.city || tenant.address || 'Türkiye'}</span>
           </span>
           <span className="hidden sm:inline">•</span>
-          <span className="hidden sm:inline">Çalışma Saatleri: 10:00 - 21:00</span>
+          <span className="hidden sm:inline">7/24 Kesintisiz Online Randevu</span>
         </div>
         <div className="hidden sm:flex items-center space-x-4 text-[11px]">
-          <a
-            href="https://www.instagram.com/bage.nailstudio/"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-white flex items-center space-x-1 transition"
-          >
-            <Instagram className="w-3.5 h-3.5" />
-            <span>@bage.nailstudio</span>
-          </a>
-          <a href="tel:+902125551234" className="hover:text-white font-semibold">
-            +90 212 555 12 34
-          </a>
+          {tenant.instagramHandle && (
+            <a
+              href={`https://www.instagram.com/${tenant.instagramHandle.replace('@', '')}/`}
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-white flex items-center space-x-1 transition"
+            >
+              <Instagram className="w-3.5 h-3.5" />
+              <span>{tenant.instagramHandle}</span>
+            </a>
+          )}
+          {tenant.phone && (
+            <a href={`tel:${tenant.phone}`} className="hover:text-white font-semibold">
+              {tenant.phone}
+            </a>
+          )}
         </div>
       </div>
 
@@ -283,11 +303,23 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
                   </div>
                 );
               })}
+
+              {filteredServices.length === 0 && (
+                <div className="bg-white rounded-2xl p-8 text-center text-slate-500 border border-brand-100 space-y-1">
+                  <p className="font-semibold text-sm text-slate-700">Bu işletmede henüz hizmet listesi tanımlanmamış.</p>
+                  <p className="text-xs text-slate-400">Lütfen daha sonra tekrar deneyiniz.</p>
+                </div>
+              )}
             </div>
 
             <button
-              onClick={() => setStep(2)}
-              className="w-full py-3.5 bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 text-white font-bold text-xs sm:text-sm rounded-2xl transition flex items-center justify-center space-x-2 shadow-md shadow-brand-900/10 cursor-pointer mt-4"
+              disabled={!selectedService}
+              onClick={() => selectedService && setStep(2)}
+              className={`w-full py-3.5 text-white font-bold text-xs sm:text-sm rounded-2xl transition flex items-center justify-center space-x-2 shadow-md shadow-brand-900/10 mt-4 ${
+                !selectedService
+                  ? 'bg-slate-300 cursor-not-allowed opacity-60'
+                  : 'bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 cursor-pointer'
+              }`}
             >
               <span>Tarih ve Saat Seçimiyle Devam Et</span>
               <ChevronRight className="w-4 h-4" />

@@ -79,6 +79,19 @@ export default function AdminCalendarPage() {
   const [depositAmount, setDepositAmount] = useState<number>(200);
   const [depositPaymentMethod, setDepositPaymentMethod] = useState<'CASH' | 'CREDIT_CARD' | 'HAVALE'>('CREDIT_CARD');
 
+  // Personel ve hizmet listesi yüklendiğinde varsayılan seçimleri eşitle
+  useEffect(() => {
+    if (!newStaffId && staffList.length > 0) {
+      setNewStaffId(staffList[0].id);
+    }
+  }, [staffList, newStaffId]);
+
+  useEffect(() => {
+    if (!newServiceId && services.length > 0) {
+      setNewServiceId(services[0].id);
+    }
+  }, [services, newServiceId]);
+
   // 7/24 Kesintisiz Takvim Saat Dilimleri (00:00 - 23:00)
   const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
 

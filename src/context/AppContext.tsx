@@ -134,6 +134,9 @@ interface AppContextType {
 
   // Business & SaaS Helpers
   updateTenant: (tenantData: Partial<Tenant>) => void;
+  loadStoreBySlug: (slug: string) => Promise<Tenant | null>;
+  setServices: React.Dispatch<React.SetStateAction<Service[]>>;
+  setStaffList: React.Dispatch<React.SetStateAction<Staff[]>>;
   loadTemplateServices: () => void;
   resetAllData: () => void;
   logout: () => void;
@@ -339,6 +342,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       db.upsertTenant(updated);
       return updated;
     });
+  };
+
+  const loadStoreBySlug = async (slug: string): Promise<Tenant | null> => {
+    const cleanSlug = slug.toLowerCase().trim();
+    const cloudTenant = await db.getTenantBySlug(cleanSlug);
+    if (cloudTenant) {
+      setTenant(cloudTenant);
+      const [cloudServices, cloudStaff, cloudApts] = await Promise.all([
+        db.getServices(cloudTenant.id),
+        db.getStaff(cloudTenant.id),
+        db.getAppointments(cloudTenant.id),
+      ]);
+      if (cloudServices && cloudServices.length > 0) setServices(cloudServices);
+      if (cloudStaff && cloudStaff.length > 0) setStaffList(cloudStaff);
+      if (cloudApts && cloudApts.length > 0) setAppointments(cloudApts);
+      return cloudTenant;
+    }
+    return null;
   };
 
   const loadTemplateServices = () => {
@@ -927,6 +948,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sendWhatsAppMessage,
         openWhatsAppChat,
         updateTenant,
+        loadStoreBySlug,
+        setServices,
+        setStaffList,
         loadTemplateServices,
         resetAllData,
         logout,
