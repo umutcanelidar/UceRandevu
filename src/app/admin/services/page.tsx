@@ -15,7 +15,7 @@ import {
 import { Service } from '@/types';
 
 export default function AdminServicesPage() {
-  const { currentUser, tenant, services, addService, updateService, deleteService } = useApp();
+  const { currentUser, tenant, services, addService, updateService, deleteService, loadTemplateServices } = useApp();
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -35,7 +35,7 @@ export default function AdminServicesPage() {
         </div>
         <h2 className="text-lg font-bold text-brand-950 font-serif">Yetkisiz Erişim</h2>
         <p className="text-xs text-brand-700 leading-relaxed">
-          Hizmet ve fiyat tanımlamaları yalnızca <strong>BAGE Salon Sahibi</strong> tarafından yönetilebilir.
+          Hizmet ve fiyat tanımlamaları yalnızca <strong>Salon Sahibi (Yönetici)</strong> tarafından yönetilebilir.
         </p>
       </div>
     );
@@ -110,18 +110,56 @@ export default function AdminServicesPage() {
           </p>
         </div>
 
-        <button
-          onClick={openNewModal}
-          className="px-4 py-2.5 bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 text-white text-xs font-bold rounded-xl transition flex items-center space-x-1.5 shadow-sm shadow-brand-900/10 cursor-pointer"
-        >
-          <PlusCircle className="w-4 h-4 text-amber-200" />
-          <span>Yeni Hizmet Ekle</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          {services.length === 0 && (
+            <button
+              onClick={loadTemplateServices}
+              className="px-3.5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-900 border border-brand-200 text-xs font-bold rounded-xl transition flex items-center space-x-1.5 cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span>Örnek Hizmet Şablonunu Yükle</span>
+            </button>
+          )}
+          <button
+            onClick={openNewModal}
+            className="px-4 py-2.5 bg-gradient-to-r from-brand-700 to-brand-800 hover:from-brand-800 hover:to-brand-900 text-white text-xs font-bold rounded-xl transition flex items-center space-x-1.5 shadow-sm shadow-brand-900/10 cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4 text-amber-200" />
+            <span>Yeni Hizmet Ekle</span>
+          </button>
+        </div>
       </div>
 
       {/* Services Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {services.map((srv) => (
+        {services.length === 0 ? (
+          <div className="col-span-full bg-white rounded-3xl p-12 text-center border-2 border-dashed border-brand-200 space-y-4 my-2">
+            <div className="w-14 h-14 bg-brand-50 text-brand-700 rounded-2xl flex items-center justify-center mx-auto border border-brand-200">
+              <Tag className="w-7 h-7" />
+            </div>
+            <h3 className="text-lg font-bold text-brand-950 font-serif">Henüz Hizmet Tanımlanmadı</h3>
+            <p className="text-xs text-brand-700 max-w-md mx-auto leading-relaxed">
+              İşletmenizin sunduğu uygulamaları, işlem sürelerini ve fiyatlarını belirlemek için kendiniz yeni hizmet ekleyebilir veya tek tıkla standart şablonu yükleyebilirsiniz.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button
+                onClick={openNewModal}
+                className="inline-flex items-center space-x-2 px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-bold rounded-xl transition shadow-sm cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4 text-amber-200" />
+                <span>Yeni Hizmet Ekle</span>
+              </button>
+              <button
+                onClick={loadTemplateServices}
+                className="inline-flex items-center space-x-2 px-4 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-900 border border-brand-200 text-xs font-bold rounded-xl transition cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-amber-600" />
+                <span>Örnek Şablonu Yükle</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          services.map((srv) => (
           <div
             key={srv.id}
             className="bg-white rounded-2xl border border-brand-100 p-5 shadow-xs flex flex-col justify-between space-y-4 hover:border-brand-300 transition"
@@ -177,7 +215,7 @@ export default function AdminServicesPage() {
               </span>
             </div>
           </div>
-        ))}
+        )))}
       </div>
 
       {/* Modal: Add/Edit Service (MÜŞTERİ TALİMATI 11) */}

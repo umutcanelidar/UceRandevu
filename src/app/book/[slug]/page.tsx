@@ -129,40 +129,39 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
       <header className="bg-white/90 backdrop-blur-md border-b border-brand-100 sticky top-0 z-30 shadow-xs">
         <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-sm border border-brand-200 bg-brand-900 shrink-0">
+            <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-sm border border-brand-200 bg-brand-900 shrink-0 flex items-center justify-center p-0.5">
               <img
-                src="/bage-logo.jpg"
-                alt="BAGE Nail Studio | Beaute"
-                className="w-full h-full object-cover"
+                src={tenant.logoUrl || '/uce_logo.jpg'}
+                alt={tenant.name}
+                className="w-full h-full object-cover rounded-xl"
               />
             </div>
             <div>
               <div className="flex items-center space-x-1.5">
                 <h1 className="font-serif font-bold text-base sm:text-lg text-brand-950 tracking-tight">
-                  BAGE Nail Studio
+                  {tenant.name}
                 </h1>
-                <span className="text-brand-700 font-serif italic text-xs sm:text-sm font-semibold">
-                  | Beaute
-                </span>
               </div>
               <p className="text-[11px] text-brand-700 font-medium tracking-wide">
-                Bagenailstudiobeaute.com
+                Online Randevu Portalı
               </p>
             </div>
           </div>
 
           <div className="flex items-center space-x-2">
+            {tenant.instagramHandle && (
+              <a
+                href={`https://instagram.com/${tenant.instagramHandle.replace('@', '')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="p-2 rounded-full bg-brand-50 hover:bg-brand-100 text-brand-800 text-xs font-semibold flex items-center transition border border-brand-200"
+                title={`Instagram: ${tenant.instagramHandle}`}
+              >
+                <Instagram className="w-4 h-4 text-brand-700" />
+              </a>
+            )}
             <a
-              href="https://www.instagram.com/bage.nailstudio/"
-              target="_blank"
-              rel="noreferrer"
-              className="p-2 rounded-full bg-brand-50 hover:bg-brand-100 text-brand-800 text-xs font-semibold flex items-center transition border border-brand-200"
-              title="Instagram: @bage.nailstudio"
-            >
-              <Instagram className="w-4 h-4 text-brand-700" />
-            </a>
-            <a
-              href="tel:+902125551234"
+              href={`tel:${tenant.phone || '+905000000000'}`}
               className="px-3 py-1.5 rounded-full bg-brand-50 hover:bg-brand-100 text-brand-800 text-xs font-semibold flex items-center space-x-1.5 transition border border-brand-200"
             >
               <Phone className="w-3.5 h-3.5 text-brand-700" />
@@ -174,11 +173,11 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
 
       {/* Main Booking Container (Mobile-First Centered Card) */}
       <main className="max-w-xl w-full mx-auto px-4 py-5 flex-1">
-        {/* Banner Title requested by client: "BAGE Online Randevu Sistemi" */}
+        {/* Banner Title */}
         <div className="text-center mb-6 pt-2">
           <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-semibold mb-2">
             <Sparkles className="w-3 h-3 text-brand-700" />
-            <span>BAGE Online Randevu Sistemi</span>
+            <span>{tenant.name} Online Randevu</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-serif font-bold text-brand-950 tracking-tight">
             Özel Randevu Talebi

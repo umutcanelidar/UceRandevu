@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   Tenant,
   Staff,
@@ -32,6 +32,7 @@ import {
   initialAppointments,
   initialTransactions,
   initialAutomationLogs,
+  templateBeautyServices,
 } from '@/lib/store';
 import { maskCustomerName, maskCustomerPhone } from '@/lib/masking';
 
@@ -130,14 +131,21 @@ interface AppContextType {
   updateService: (id: string, srv: Partial<Service>) => void;
   deleteService: (id: string) => void;
 
+  // Business & SaaS Helpers
+  updateTenant: (tenantData: Partial<Tenant>) => void;
+  loadTemplateServices: () => void;
+  resetAllData: () => void;
+  logout: () => void;
+
   // Communication
   sendWhatsAppMessage: (phone: string, message: string) => void;
+  openWhatsAppChat: (phone: string, message: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [tenant] = useState<Tenant>(initialTenant);
+  const [tenant, setTenant] = useState<Tenant>(initialTenant);
   const [staffList, setStaffList] = useState<Staff[]>(initialStaff);
   const [services, setServices] = useState<Service[]>(initialServices);
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
@@ -151,30 +159,177 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [automationLogs, setAutomationLogs] = useState<AutomationLog[]>(initialAutomationLogs);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Default active user is SPECIAL_ADMIN (BAGE Salon Sahibi / Yönetici)
+  // Default active user is SPECIAL_ADMIN (Salon Sahibi / Yönetici)
   const [currentUser, setCurrentUser] = useState<CurrentUser>({
     id: 'admin-1',
-    name: 'BAGE Salon Sahibi (Yönetici)',
+    name: 'Salon Sahibi (Yönetici)',
     role: 'SPECIAL_ADMIN',
   });
 
+  // Client-side LocalStorage Hydration (Sayfa yenilendiğinde veriler kalıcı kalsın)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const savedTenant = localStorage.getItem('uce_tenant');
+      const savedStaff = localStorage.getItem('uce_staffList');
+      const savedServices = localStorage.getItem('uce_services');
+      const savedCustomers = localStorage.getItem('uce_customers');
+      const savedPackages = localStorage.getItem('uce_packages');
+      const savedCustomerPackages = localStorage.getItem('uce_customerPackages');
+      const savedRetailProducts = localStorage.getItem('uce_retailProducts');
+      const savedProductSales = localStorage.getItem('uce_productSales');
+      const savedInventory = localStorage.getItem('uce_inventoryItems');
+      const savedWaitlist = localStorage.getItem('uce_waitlist');
+      const savedAppointments = localStorage.getItem('uce_appointments');
+      const savedTransactions = localStorage.getItem('uce_transactions');
+      const savedAutomationLogs = localStorage.getItem('uce_automationLogs');
+      const savedCurrentUser = localStorage.getItem('uce_current_user');
+
+      if (savedTenant) setTenant(JSON.parse(savedTenant));
+      if (savedStaff) setStaffList(JSON.parse(savedStaff));
+      if (savedServices) setServices(JSON.parse(savedServices));
+      if (savedCustomers) setCustomers(JSON.parse(savedCustomers));
+      if (savedPackages) setPackages(JSON.parse(savedPackages));
+      if (savedCustomerPackages) setCustomerPackages(JSON.parse(savedCustomerPackages));
+      if (savedRetailProducts) setRetailProducts(JSON.parse(savedRetailProducts));
+      if (savedProductSales) setProductSales(JSON.parse(savedProductSales));
+      if (savedInventory) setInventoryItems(JSON.parse(savedInventory));
+      if (savedWaitlist) setWaitlist(JSON.parse(savedWaitlist));
+      if (savedAppointments) setAppointments(JSON.parse(savedAppointments));
+      if (savedTransactions) setTransactions(JSON.parse(savedTransactions));
+      if (savedAutomationLogs) setAutomationLogs(JSON.parse(savedAutomationLogs));
+      if (savedCurrentUser) setCurrentUser(JSON.parse(savedCurrentUser));
+    } catch (e) {
+      console.warn('LocalStorage okuma hatası:', e);
+    } finally {
+      setIsHydrated(true);
+    }
+  }, []);
+
+  // Save to LocalStorage whenever state changes
+  useEffect(() => {
+    if (!isHydrated || typeof window === 'undefined') return;
+    try {
+      localStorage.setItem('uce_tenant', JSON.stringify(tenant));
+      localStorage.setItem('uce_staffList', JSON.stringify(staffList));
+      localStorage.setItem('uce_services', JSON.stringify(services));
+      localStorage.setItem('uce_customers', JSON.stringify(customers));
+      localStorage.setItem('uce_packages', JSON.stringify(packages));
+      localStorage.setItem('uce_customerPackages', JSON.stringify(customerPackages));
+      localStorage.setItem('uce_retailProducts', JSON.stringify(retailProducts));
+      localStorage.setItem('uce_productSales', JSON.stringify(productSales));
+      localStorage.setItem('uce_inventoryItems', JSON.stringify(inventoryItems));
+      localStorage.setItem('uce_waitlist', JSON.stringify(waitlist));
+      localStorage.setItem('uce_appointments', JSON.stringify(appointments));
+      localStorage.setItem('uce_transactions', JSON.stringify(transactions));
+      localStorage.setItem('uce_automationLogs', JSON.stringify(automationLogs));
+      localStorage.setItem('uce_current_user', JSON.stringify(currentUser));
+    } catch (e) {
+      console.warn('LocalStorage yazma hatası:', e);
+    }
+  }, [
+    isHydrated,
+    tenant,
+    staffList,
+    services,
+    customers,
+    packages,
+    customerPackages,
+    retailProducts,
+    productSales,
+    inventoryItems,
+    waitlist,
+    appointments,
+    transactions,
+    automationLogs,
+    currentUser,
+  ]);
+
   const switchUser = (role: Role, staffCode?: string) => {
     if (role === 'SPECIAL_ADMIN' || role === 'SUPER_ADMIN') {
-      setCurrentUser({
+      const adminUser: CurrentUser = {
         id: 'admin-1',
-        name: 'BAGE Salon Sahibi (Yönetici)',
+        name: 'Salon Sahibi (Yönetici)',
         role,
-      });
+      };
+      setCurrentUser(adminUser);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('uce_current_user', JSON.stringify(adminUser));
+      }
     } else if (role === 'STAFF') {
-      const staff = staffList.find((s) => s.staffCode === staffCode) || staffList[0];
-      setCurrentUser({
-        id: staff.id,
-        name: staff.name,
-        role: 'STAFF',
-        staffId: staff.staffCode,
-        staffRecordId: staff.id,
-      });
+      const staff = staffList.find((s) => s.staffCode === staffCode);
+      if (staff) {
+        const staffUser: CurrentUser = {
+          id: staff.id,
+          name: staff.name,
+          role: 'STAFF',
+          staffId: staff.staffCode,
+          staffRecordId: staff.id,
+        };
+        setCurrentUser(staffUser);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('uce_current_user', JSON.stringify(staffUser));
+        }
+      }
+    }
+  };
+
+  const logout = () => {
+    const defaultUser: CurrentUser = {
+      id: 'admin-1',
+      name: 'Salon Sahibi (Yönetici)',
+      role: 'SPECIAL_ADMIN',
+    };
+    setCurrentUser(defaultUser);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('uce_current_user');
+    }
+  };
+
+  const updateTenant = (tenantData: Partial<Tenant>) => {
+    setTenant((prev) => ({ ...prev, ...tenantData }));
+  };
+
+  const loadTemplateServices = () => {
+    setServices(templateBeautyServices);
+  };
+
+  const resetAllData = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('uce_staffList');
+      localStorage.removeItem('uce_services');
+      localStorage.removeItem('uce_customers');
+      localStorage.removeItem('uce_packages');
+      localStorage.removeItem('uce_customerPackages');
+      localStorage.removeItem('uce_retailProducts');
+      localStorage.removeItem('uce_productSales');
+      localStorage.removeItem('uce_inventoryItems');
+      localStorage.removeItem('uce_waitlist');
+      localStorage.removeItem('uce_appointments');
+      localStorage.removeItem('uce_transactions');
+      localStorage.removeItem('uce_automationLogs');
+    }
+    setStaffList([]);
+    setServices([]);
+    setCustomers([]);
+    setPackages([]);
+    setCustomerPackages([]);
+    setRetailProducts([]);
+    setProductSales([]);
+    setInventoryItems([]);
+    setWaitlist([]);
+    setAppointments([]);
+    setTransactions([]);
+    setAutomationLogs([]);
+  };
+
+  const openWhatsAppChat = (phone: string, message: string) => {
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    if (typeof window !== 'undefined') {
+      window.open(url, '_blank');
     }
   };
 
@@ -713,6 +868,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updateService,
         deleteService,
         sendWhatsAppMessage,
+        openWhatsAppChat,
+        updateTenant,
+        loadTemplateServices,
+        resetAllData,
+        logout,
       }}
     >
       {children}

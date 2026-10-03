@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import {
@@ -21,14 +21,27 @@ export default function LoginPage() {
   const { tenant, staffList, switchUser } = useApp();
 
   const [activeTab, setActiveTab] = useState<'ADMIN' | 'STAFF'>('ADMIN');
+  const [storeName, setStoreName] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const storeParam = urlParams.get('store');
+      const savedSlug = localStorage.getItem('uce_tenant_slug');
+      const active = storeParam || savedSlug;
+      if (active) {
+        setStoreName(active.toUpperCase());
+      }
+    }
+  }, []);
 
   // Admin form
-  const [adminEmail, setAdminEmail] = useState('yonetici@bagenailstudio.com');
+  const [adminEmail, setAdminEmail] = useState('yonetici@isletme.com');
   const [adminPassword, setAdminPassword] = useState('123456');
 
   // Staff form
-  const [selectedStaffCode, setSelectedStaffCode] = useState(staffList[0]?.staffCode || 'ST-01');
-  const [staffPin, setStaffPin] = useState('1234');
+  const [selectedStaffCode, setSelectedStaffCode] = useState(staffList[0]?.staffCode || '');
+  const [staffPin, setStaffPin] = useState('');
 
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -48,11 +61,16 @@ export default function LoginPage() {
     e.preventDefault();
     setErrorMsg('');
 
-    const staff = staffList.find((s) => s.staffCode === selectedStaffCode);
-    const expectedPin = staff?.pinCode || '1234';
+    if (staffList.length === 0) {
+      setErrorMsg('Sistemde henüz kayıtlı personel bulunmuyor. Lütfen önce Salon Sahibi olarak giriş yapınız.');
+      return;
+    }
 
-    if (staffPin.trim() !== expectedPin) {
-      setErrorMsg(`Hatalı PIN kodu! Lütfen ${staff?.name || 'personel'} için belirlenen geçerli PIN kodunu giriniz.`);
+    const staff = staffList.find((s) => s.staffCode === selectedStaffCode);
+    const expectedPin = staff?.pinCode || '';
+
+    if (!staffPin.trim() || staffPin.trim() !== expectedPin) {
+      setErrorMsg(`Hatalı PIN kodu! Lütfen ${staff?.name || 'personel'} için yöneticinizin belirlediği geçerli PIN kodunu giriniz.`);
       return;
     }
 
@@ -70,7 +88,7 @@ export default function LoginPage() {
       <div className="bg-[#800020] text-amber-100/90 text-xs py-2 px-4 font-medium tracking-wider flex items-center justify-between">
         <div className="flex items-center space-x-2 mx-auto sm:mx-0">
           <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-          <span>BAGE Nail Studio | Beaute • Güvenli Giriş Kapısı</span>
+          <span>{storeName ? `${storeName} • Güvenli Giriş Kapısı` : `${tenant.name} • Güvenli Giriş Kapısı`}</span>
         </div>
         <div className="hidden sm:flex items-center space-x-3 text-xs font-semibold">
           <span>UCE Bilişim Güvencesiyle</span>
@@ -82,16 +100,16 @@ export default function LoginPage() {
         <div className="max-w-md w-full bg-white rounded-3xl border border-brand-100 shadow-xl overflow-hidden p-6 sm:p-8 space-y-6">
           {/* Logo & Header */}
           <div className="text-center space-y-2">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-md border border-brand-200 mx-auto bg-brand-900">
+            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-md border border-brand-200 mx-auto bg-brand-900 p-1 flex items-center justify-center">
               <img
-                src="/bage-logo.jpg"
-                alt="BAGE Nail Studio"
-                className="w-full h-full object-cover"
+                src={tenant.logoUrl || '/uce_logo.jpg'}
+                alt="İşletme Logosu"
+                className="w-full h-full object-cover rounded-xl"
               />
             </div>
             <div>
               <h1 className="font-serif font-bold text-xl sm:text-2xl text-brand-950 tracking-tight">
-                BAGE Nail Studio | Beaute
+                {storeName ? `${storeName} Yönetim Portalı` : tenant.name}
               </h1>
               <p className="text-xs text-brand-700 font-medium">
                 İşletme Yönetimi & Personel Portalı
@@ -214,47 +232,69 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <div>
-                <label className="block font-semibold text-brand-950 mb-1">
-                  Personel Seçiniz
-                </label>
-                <select
-                  value={selectedStaffCode}
-                  onChange={(e) => setSelectedStaffCode(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 font-semibold text-brand-950 shadow-2xs bg-white"
-                >
-                  {staffList.map((s) => (
-                    <option key={s.id} value={s.staffCode}>
-                      {s.name} ({s.staffCode} - {s.title})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-brand-950 mb-1">
-                  Personel PIN / Şifre
-                </label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    required
-                    value={staffPin}
-                    onChange={(e) => setStaffPin(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 font-mono text-brand-950 shadow-2xs bg-white"
-                  />
-                  <KeyRound className="w-4 h-4 text-brand-400 absolute right-3 top-3" />
+              {staffList.length === 0 ? (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 space-y-2.5 text-center">
+                  <div className="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center mx-auto">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-xs sm:text-sm text-amber-950">Henüz Kayıtlı Personel Yok</h3>
+                  <p className="text-[11px] text-amber-800 leading-relaxed">
+                    İşletmenizde henüz kayıtlı personel hesabı bulunmamaktadır. Lütfen yukarıdaki <strong>Salon Sahibi</strong> sekmesine tıklayarak yönetici girişi yapınız ve <strong>Personeller</strong> sayfasından ilk personelinizi ekleyiniz.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('ADMIN')}
+                    className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl transition shadow-xs cursor-pointer"
+                  >
+                    Salon Sahibi Girişine Geç
+                  </button>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="block font-semibold text-brand-950 mb-1">
+                      Personel Seçiniz
+                    </label>
+                    <select
+                      value={selectedStaffCode || (staffList[0]?.staffCode ?? '')}
+                      onChange={(e) => setSelectedStaffCode(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 font-semibold text-brand-950 shadow-2xs bg-white"
+                    >
+                      {staffList.map((s) => (
+                        <option key={s.id} value={s.staffCode}>
+                          {s.name} ({s.staffCode} - {s.title})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold text-xs sm:text-sm rounded-2xl transition shadow-md shadow-emerald-900/15 flex items-center justify-center space-x-2 cursor-pointer"
-              >
-                <span>{isLoading ? 'Giriş Yapılıyor...' : 'Personel Ajandama Giriş Yap'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+                  <div>
+                    <label className="block font-semibold text-brand-950 mb-1">
+                      Personel PIN / Şifre
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        required
+                        placeholder="Yöneticinizin verdiği 4 haneli PIN"
+                        value={staffPin}
+                        onChange={(e) => setStaffPin(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 font-mono text-brand-950 shadow-2xs bg-white"
+                      />
+                      <KeyRound className="w-4 h-4 text-brand-400 absolute right-3 top-3" />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold text-xs sm:text-sm rounded-2xl transition shadow-md shadow-emerald-900/15 flex items-center justify-center space-x-2 cursor-pointer"
+                  >
+                    <span>{isLoading ? 'Giriş Yapılıyor...' : 'Personel Ajandama Giriş Yap'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
 
               <div className="text-center pt-1">
                 <span className="text-[11px] text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">

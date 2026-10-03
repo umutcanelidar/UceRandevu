@@ -409,15 +409,28 @@ export default function AdminCalendarPage() {
                           >
                             <Phone className="w-3.5 h-3.5 text-brand-700" />
                           </a>
-                          <a
-                            href={`https://wa.me/90${apt.customerPhone.replace(/[^0-9]/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 text-emerald-700 hover:bg-emerald-50 rounded-lg transition"
-                            title="WhatsApp Mesajı Gönder"
-                          >
-                            <MessageCircle className="w-3.5 h-3.5" />
-                          </a>
+                          {(() => {
+                            const digits = apt.customerPhone.replace(/[^0-9]/g, '');
+                            const normalized = digits.startsWith('90')
+                              ? digits
+                              : digits.startsWith('0')
+                              ? '9' + digits
+                              : '90' + digits;
+                            const text = encodeURIComponent(
+                              `Sayın ${apt.customerName}, ${tenant.name} bünyesindeki ${apt.date} saat ${apt.startTime} randevunuz ile ilgili bilgilendirmedir.`
+                            );
+                            return (
+                              <a
+                                href={`https://wa.me/${normalized}?text=${text}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1.5 text-emerald-700 hover:bg-emerald-50 rounded-lg transition"
+                                title="WhatsApp'tan Doğrudan Mesaj Gönder"
+                              >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                              </a>
+                            );
+                          })()}
                         </div>
                       ) : (
                         <span className="text-[10px] text-slate-400 font-mono">Gizli No</span>
@@ -911,14 +924,18 @@ export default function AdminCalendarPage() {
                     onChange={(e) => setNewStaffId(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 text-xs font-medium shadow-2xs bg-white"
                   >
-                    {staffList.map((s) => {
-                      const isOff = isStaffOff(s, selectedDate);
-                      return (
-                        <option key={s.id} value={s.id}>
-                          {s.name} {isOff ? '⚠️ (İzinli)' : `(${s.staffCode})`}
-                        </option>
-                      );
-                    })}
+                    {staffList.length === 0 ? (
+                      <option value="">Lütfen önce personel ekleyin</option>
+                    ) : (
+                      staffList.map((s) => {
+                        const isOff = isStaffOff(s, selectedDate);
+                        return (
+                          <option key={s.id} value={s.id}>
+                            {s.name} {isOff ? '⚠️ (İzinli)' : `(${s.staffCode})`}
+                          </option>
+                        );
+                      })
+                    )}
                   </select>
                 </div>
 
@@ -929,11 +946,15 @@ export default function AdminCalendarPage() {
                     onChange={(e) => setNewServiceId(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl border border-brand-200 focus:outline-hidden focus:border-brand-700 text-xs font-medium shadow-2xs bg-white"
                   >
-                    {services.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} ({s.price} ₺)
-                      </option>
-                    ))}
+                    {services.length === 0 ? (
+                      <option value="">Lütfen önce hizmet tanımlayın</option>
+                    ) : (
+                      services.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} ({s.price} ₺)
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
               </div>

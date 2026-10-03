@@ -40,6 +40,26 @@ export default function StaffPortalPage() {
   const [startTime, setStartTime] = useState('14:00');
   const [notes, setNotes] = useState('');
 
+  if (!currentStaff) {
+    return (
+      <div className="bg-white rounded-3xl p-8 border border-brand-100 max-w-lg mx-auto text-center space-y-4 my-12 shadow-xs">
+        <div className="w-12 h-12 bg-amber-50 text-amber-700 rounded-2xl flex items-center justify-center mx-auto border border-amber-200">
+          <Lock className="w-6 h-6" />
+        </div>
+        <h2 className="text-lg font-bold text-brand-950 font-serif">Aktif Personel Girişi Bulunamadı</h2>
+        <p className="text-xs text-brand-700 leading-relaxed">
+          Personel ajandasına erişebilmek için lütfen geçerli bir personel hesabı ve PIN kodu ile giriş yapınız.
+        </p>
+        <a
+          href="/login"
+          className="inline-flex items-center justify-center px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs rounded-xl transition shadow-xs cursor-pointer"
+        >
+          Giriş Sayfasına Git
+        </a>
+      </div>
+    );
+  }
+
   // Confidentiality Filter: Only this staff's appointments!
   const myAppointments = appointments.filter(
     (apt) => apt.staffId === currentStaff.id && apt.date === selectedDate

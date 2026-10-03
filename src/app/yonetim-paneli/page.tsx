@@ -25,35 +25,10 @@ import {
 
 export default function UceBilisimManagementGateway() {
   const router = useRouter();
-  const [storeSlug, setStoreSlug] = useState('bagenailstudio');
+  const [storeSlug, setStoreSlug] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-
-  // UCE Bilişim ekosistemindeki kayıtlı kiracı işletmeler
-  const registeredTenants = [
-    {
-      slug: 'bagenailstudio',
-      name: 'BAGE Nail Studio | Beaute',
-      category: 'Protez Tırnak & Lüks Bakım',
-      status: 'AKTİF',
-      domain: 'bagenailstudio.ucebilisim.com',
-    },
-    {
-      slug: 'alabeaute',
-      name: 'ALA Beauté Club Nişantaşı',
-      category: 'Güzellik & Saç Tasarım',
-      status: 'AKTİF',
-      domain: 'alabeaute.ucebilisim.com',
-    },
-    {
-      slug: 'kuaforesra',
-      name: 'Esra Kuaför & Nail Art',
-      category: 'Kuaför & Tırnak Stüdyosu',
-      status: 'DEMO',
-      domain: 'kuaforesra.ucebilisim.com',
-    },
-  ];
 
   const handleRedirectToPanel = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +41,8 @@ export default function UceBilisimManagementGateway() {
       .replace('.ucebilisim.com', '')
       .replace('.ucebilişim.com', '')
       .replace('https://', '')
-      .replace('http://', '');
+      .replace('http://', '')
+      .replace(/[^a-z0-9-_]/g, '');
 
     if (!cleanSlug) {
       setErrorMessage('Lütfen işletmenizin alt alan adını (site adresini) giriniz.');
@@ -74,21 +50,15 @@ export default function UceBilisimManagementGateway() {
     }
 
     setIsLoading(true);
+    setSuccessMessage(`${cleanSlug}.ucebilisim.com yönetim paneli girişine aktarılıyorsunuz...`);
 
-    const matched = registeredTenants.find((t) => t.slug === cleanSlug || cleanSlug.includes('bage'));
-
-    if (matched || cleanSlug === 'bagenailstudio') {
-      setSuccessMessage(`${matched?.name || 'BAGE Nail Studio'} giriş sayfasına yönlendiriliyorsunuz...`);
-
-      setTimeout(() => {
-        router.push('/login');
-      }, 500);
-    } else {
-      setSuccessMessage(`${cleanSlug}.ucebilisim.com giriş sayfasına yönlendiriliyorsunuz...`);
-      setTimeout(() => {
-        router.push('/login');
-      }, 600);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('uce_tenant_slug', cleanSlug);
     }
+
+    setTimeout(() => {
+      router.push(`/login?store=${encodeURIComponent(cleanSlug)}`);
+    }, 450);
   };
 
   return (
@@ -193,7 +163,7 @@ export default function UceBilisimManagementGateway() {
                     <input
                       type="text"
                       required
-                      placeholder="bagenailstudio"
+                      placeholder="isletme-adiniz"
                       value={storeSlug}
                       onChange={(e) => setStoreSlug(e.target.value)}
                       className="w-full py-3 px-2 text-xs sm:text-sm font-semibold text-[#1a1a1a] focus:outline-hidden bg-transparent"
@@ -203,7 +173,7 @@ export default function UceBilisimManagementGateway() {
                     </span>
                   </div>
                   <p className="text-[11px] text-[#666666] mt-1.5">
-                    Örnek: <strong>bagenailstudio</strong> yazarak doğrudan işletmenizin giriş sayfasına bağlanabilirsiniz.
+                    Örnek: İşletmenizin alt alan adını yazarak doğrudan kendi yönetim panelinize bağlanabilirsiniz.
                   </p>
                 </div>
 
@@ -220,32 +190,6 @@ export default function UceBilisimManagementGateway() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
-
-              {/* Hızlı Seçim Butonları */}
-              <div className="pt-2 border-t border-[#e5d5b5]/40">
-                <span className="text-[11px] font-bold text-[#8c6d3f] uppercase tracking-wider block mb-2 font-mono">
-                  Kayıtlı İşletmeler:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {registeredTenants.map((t) => (
-                    <button
-                      key={t.slug}
-                      type="button"
-                      onClick={() => {
-                        setStoreSlug(t.slug);
-                      }}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition border cursor-pointer ${
-                        storeSlug === t.slug
-                          ? 'bg-[#fcfbf9] text-[#8c6d3f] border-[#c5a059] shadow-xs font-bold'
-                          : 'bg-[#f7f4ee] text-[#555555] border-[#e5d5b5]/50 hover:bg-[#ede7d8]'
-                      }`}
-                    >
-                      <span>{t.name.split(' ')[0]}</span>
-                      <span className="text-[10px] text-[#8c6d3f]/70 ml-1">({t.slug})</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Footer Bilgisi */}
@@ -337,9 +281,7 @@ export default function UceBilisimManagementGateway() {
         <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>UCE Bilişim • Çok Kiracılı (Multi-Tenant) Randevu Platformu</span>
           <div className="flex items-center space-x-4 text-xs font-semibold text-[#8c6d3f]">
-            <Link href="/login" className="hover:text-[#1a1a1a]">Doğrudan Giriş</Link>
-            <span>•</span>
-            <Link href="/book/bage-studio" className="hover:text-[#1a1a1a]">BAGE Online Randevu</Link>
+            <Link href="/login" className="hover:text-[#1a1a1a]">Yönetici & Personel Girişi</Link>
           </div>
         </div>
       </footer>

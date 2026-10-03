@@ -167,8 +167,26 @@ export default function AdminStaffPage() {
 
       {/* Staff Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {staffList.map((staff) => {
-          const staffApts = appointments.filter((a) => a.staffId === staff.id);
+        {staffList.length === 0 ? (
+          <div className="col-span-full bg-white rounded-3xl p-12 text-center border-2 border-dashed border-brand-200 space-y-4 my-2">
+            <div className="w-14 h-14 bg-brand-50 text-brand-700 rounded-2xl flex items-center justify-center mx-auto border border-brand-200">
+              <Users className="w-7 h-7" />
+            </div>
+            <h3 className="text-lg font-bold text-brand-950 font-serif">Henüz Personel Eklenmedi</h3>
+            <p className="text-xs text-brand-700 max-w-md mx-auto leading-relaxed">
+              İşletmenizin uzmanlarını, çalışma saatlerini, maaş/prim oranlarını ve giriş PIN kodlarını belirlemek için ilk personelinizi ekleyin.
+            </p>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center space-x-2 px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-bold rounded-xl transition shadow-sm cursor-pointer"
+            >
+              <PlusCircle className="w-4 h-4 text-amber-200" />
+              <span>İlk Personeli Ekle</span>
+            </button>
+          </div>
+        ) : (
+          staffList.map((staff) => {
+            const staffApts = appointments.filter((a) => a.staffId === staff.id);
           const completedApts = staffApts.filter((a) => a.status === 'COMPLETED');
           const totalStaffTurnover = completedApts.reduce((sum, a) => sum + a.price, 0);
           const commissionEarned = Math.round(totalStaffTurnover * ((staff.commissionRate || 35) / 100));
@@ -401,7 +419,7 @@ export default function AdminStaffPage() {
               </div>
             </div>
           );
-        })}
+        }))}
       </div>
 
       {/* MODAL: İZİN / RAPOR EKLE (MÜŞTERİ TALİMATI 3) */}
