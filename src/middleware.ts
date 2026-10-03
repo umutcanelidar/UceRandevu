@@ -23,6 +23,10 @@ export function middleware(request: NextRequest) {
   let subdomain = '';
   if (hostname.includes('.localhost')) {
     subdomain = hostname.replace('.localhost', '');
+  } else if (hostname.endsWith('.xn--ucebiliim-62b.com')) {
+    subdomain = hostname.replace('.xn--ucebiliim-62b.com', '');
+  } else if (hostname.endsWith('.ucebilişim.com')) {
+    subdomain = hostname.replace('.ucebilişim.com', '');
   } else if (hostname.endsWith('.ucebilisim.com')) {
     subdomain = hostname.replace('.ucebilisim.com', '');
   } else if (hostname.endsWith('.ucerandevu.com')) {
